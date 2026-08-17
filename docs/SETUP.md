@@ -29,6 +29,13 @@ Current state, for reference, is `nse1-4.squarespacedns.com`.
 
 ## 2. Connect the site to Cloudflare Pages
 
+**On hold.** The site is not going live yet. `UNDER_DEVELOPMENT` in `src/config.ts` is `true`,
+which shows the notice banner, marks every page `noindex`, and serves a `Disallow: /`
+robots.txt. Clearing that one flag reverses all three.
+
+Do step 1 now so nameservers propagate. Come back to this step when the site is ready to
+publish.
+
 1. In Cloudflare: **Workers & Pages → Create → Pages → Connect to Git**.
 2. Authorise GitHub and pick `avas15/avzilabs`.
 3. Build settings:

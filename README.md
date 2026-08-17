@@ -54,6 +54,17 @@ Motion lives in `src/scripts/motion.ts`. Three rules it enforces:
    revealable element visible; it is only removed once motion is confirmed to be running.
 3. It initialises after `load`, so it cannot delay LCP.
 
+## Build state
+
+`UNDER_DEVELOPMENT` in `src/config.ts` gates going public. While it is `true`:
+
+- an "under development" banner renders site-wide,
+- every page is `noindex, nofollow`,
+- `robots.txt` serves `Disallow: /`,
+- no service origin is referenced anywhere, and nothing links to a running backend.
+
+Setting it to `false` reverses all four. That is the switch for going live.
+
 ## Deployment
 
 Connected to Cloudflare Pages via the native Git integration, which does not consume GitHub

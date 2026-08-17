@@ -1,6 +1,6 @@
 ---
 import '@/styles/global.css';
-import { SITE } from '@/config';
+import { SITE, UNDER_DEVELOPMENT } from '@/config';
 import Header from '@/components/Header.astro';
 import Footer from '@/components/Footer.astro';
 
@@ -66,7 +66,15 @@ const personSchema = {
     <title>{pageTitle}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
-    {noindex && <meta name="robots" content="noindex, nofollow" />}
+    {
+      /*
+        While UNDER_DEVELOPMENT is set, nothing is indexable. Getting a
+        half-built site into the index is worse than being indexed a few weeks
+        later, and a stale cached result is slow to shift. Clearing the flag in
+        src/config.ts turns off the banner and opens indexing in one edit.
+      */
+    }
+    {(noindex || UNDER_DEVELOPMENT) && <meta name="robots" content="noindex, nofollow" />}
 
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <meta name="theme-color" content="#010a14" />

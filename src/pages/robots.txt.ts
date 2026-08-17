@@ -1,15 +1,19 @@
 import type { APIContext } from 'astro';
-import { SITE } from '@/config';
+import { SITE, UNDER_DEVELOPMENT } from '@/config';
 
 /*
-  The apex is fully crawlable. The dynamic subdomains carry X-Robots-Tag:
-  noindex via a Cloudflare Transform Rule rather than being listed here -
-  robots.txt on this host has no authority over them.
+  Crawling is closed while the site is under development, and opens with the
+  same flag that removes the banner. Note that robots.txt here has no authority
+  over any other host, so anything served elsewhere needs its own controls.
 */
 export function GET(context: APIContext) {
   const sitemapURL = new URL('sitemap-index.xml', context.site ?? SITE.url);
 
-  const body = `User-agent: *
+  const body = UNDER_DEVELOPMENT
+    ? `User-agent: *
+Disallow: /
+`
+    : `User-agent: *
 Allow: /
 
 Sitemap: ${sitemapURL.href}

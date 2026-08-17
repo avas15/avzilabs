@@ -16,15 +16,11 @@ export const SITE = {
 } as const;
 
 /**
- * Origins for the dynamic services. These live on the VPS behind Cloudflare
- * Tunnel and are noindex; only the landing pages on the apex are indexable.
- * Overridable at build time so a preview deploy can point somewhere else.
+ * Site-wide build state. While this is true the site renders an "under
+ * development" notice and every interactive surface is presented as not yet
+ * open. No service origins are referenced anywhere until the backend exists.
  */
-export const ORIGINS = {
-  api: import.meta.env.PUBLIC_API_ORIGIN ?? 'https://api.avzilabs.com',
-  play: import.meta.env.PUBLIC_PLAY_ORIGIN ?? 'https://play.avzilabs.com',
-  private: import.meta.env.PUBLIC_MY_ORIGIN ?? 'https://my.avzilabs.com',
-} as const;
+export const UNDER_DEVELOPMENT = true;
 
 export const SOCIAL = {
   github: 'https://github.com/avas15',

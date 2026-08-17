@@ -1,48 +1,30 @@
 ---
-import { Icon } from 'astro-icon/components';
 import BaseLayout from '@/layouts/BaseLayout.astro';
-import { ORIGINS } from '@/config';
 
 /*
-  Indexable landing page on the apex. The games themselves connect to
-  play.avzilabs.com, which is noindex. Keeping the marketing surface here is
-  what stops link equity leaking to a subdomain Google treats as a separate site.
+  Landing page only. Nothing here links to a running service: the game servers
+  do not exist yet, and no service origin is referenced anywhere in this build.
 */
 const games = [
   {
     title: 'BidSim',
     blurb:
-      'A live multi-team spectrum auction. Teams hold home bands, marginal valuations and deploy costs, and bid in real time over WebSockets. Built for classroom sessions, and genuinely tense.',
-    status: 'live' as const,
+      'A live multi-team spectrum auction. Teams hold home bands, marginal valuations and deploy costs, and bid in real time. Built for classroom sessions, and genuinely tense.',
     players: '2 to 12 players',
-    href: `${ORIGINS.play}/bidsim`,
   },
   {
     title: 'Drawing game',
     blurb:
       'Round-based drawing and guessing with room codes. One person draws, everyone else races to guess. Skribbl in spirit, without the ads.',
-    status: 'building' as const,
     players: '3 to 10 players',
-    href: null,
   },
   {
     title: 'Card party',
     blurb:
       'A fill-in-the-blank party card game with custom decks. Built on the Cards Against Humanity licence, which permits non-commercial derivatives, under its own name.',
-    status: 'building' as const,
     players: '4 to 10 players',
-    href: null,
   },
 ];
-
-const tone = {
-  live: 'text-ok',
-  building: 'text-warn',
-};
-const label = {
-  live: 'Playable now',
-  building: 'In development',
-};
 ---
 
 <BaseLayout
@@ -65,25 +47,15 @@ const label = {
           >
             <div class="flex flex-wrap items-center gap-3">
               <h2 class="text-xl font-600 tracking-tight text-ink">{g.title}</h2>
-              <span class:list={['text-[11px] font-500 uppercase tracking-wider', tone[g.status]]}>
-                {label[g.status]}
+              <span class="text-[11px] font-500 uppercase tracking-wider text-warn">
+                Under development
               </span>
               <span class="ml-auto text-xs text-ink-3 tnum">{g.players}</span>
             </div>
 
             <p class="mt-3 max-w-2xl text-[15px] leading-relaxed text-ink-2">{g.blurb}</p>
 
-            {g.href ? (
-              <a
-                href={g.href}
-                class="mt-5 inline-flex items-center gap-2 rounded-md bg-brand px-4 py-2.5 text-sm font-600 text-on-brand transition-colors duration-150 hover:bg-brand-hover"
-              >
-                <Icon name="lucide:play" class="h-4 w-4" stroke-width={1.75} />
-                Play now
-              </a>
-            ) : (
-              <p class="mt-5 text-sm text-ink-3">Not open yet.</p>
-            )}
+            <p class="mt-5 text-sm text-ink-3">Not open yet.</p>
           </li>
         ))
       }
