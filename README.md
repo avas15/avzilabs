@@ -43,9 +43,21 @@ build; drafts still render in dev.
 
 ## Design system
 
-Palette, typography and density come from the auction platform's `STYLE_TOKENS.md` and are
-implemented in `src/styles/global.css`. Do not introduce colours outside the four ramps
-(pumpkin, prussian, deepspace, berry).
+Phosphor CRT terminal: green on black, monospace throughout, ASCII in place of icons where a
+glyph will do. Implemented in `src/styles/global.css`.
+
+Green at full saturation is punishing to read at length, so the palette splits it: soft
+phosphor (`--text`, `#C8FFD4`) for body copy, full `#00FF41` reserved for headings, prompts and
+accents. Both sit well above AA contrast on black.
+
+- `mtx-*` is the green ramp, `void-*` the black substrate. Amber and red exist for warnings and
+  errors, as a period terminal would have them.
+- `.term` / `.term-bar` / `.term-corners` build the window chrome. `.tag`, `.prompt`, `.caret`
+  and `.ascii` are the smaller primitives.
+- A light theme is defined and works; it drops the CRT effects rather than inverting them.
+
+Two effects are decorative and always non-interactive: `.crt-scanlines` and `.crt-vignette`,
+both `pointer-events: none` and both disabled under reduced motion.
 
 Motion lives in `src/scripts/motion.ts`. Three rules it enforces:
 
@@ -56,24 +68,29 @@ Motion lives in `src/scripts/motion.ts`. Three rules it enforces:
 
 ## Build state
 
-`UNDER_DEVELOPMENT` in `src/config.ts` gates going public. While it is `true`:
+`UNDER_DEVELOPMENT` in `src/config.ts` gates public visibility. While it is `true` a banner
+renders site-wide, every page is `noindex, nofollow`, and `robots.txt` serves `Disallow: /`.
 
-- an "under development" banner renders site-wide,
-- every page is `noindex, nofollow`,
-- `robots.txt` serves `Disallow: /`,
-- no service origin is referenced anywhere, and nothing links to a running backend.
-
-Setting it to `false` reverses all four. That is the switch for going live.
+It is currently `false`. The site is live at https://avzilabs.com.
 
 ## Deployment
 
-Connected to Cloudflare Pages via the native Git integration, which does not consume GitHub
-Actions minutes.
+Live on Cloudflare Pages (project `avzilabs`), with `avzilabs.com` and `www` attached as custom
+domains. Deploys are direct uploads of `dist/`:
+
+```bash
+npx wrangler pages deploy dist --project-name avzilabs --branch main
+```
+
+Requires `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` in the environment.
 
 | Setting | Value |
 | --- | --- |
 | Build command | `npm run build` |
 | Output directory | `dist` |
 | Node version | 22 (Astro 7 requires >=22.12.0) |
+
+Zone settings: TLS 1.2 minimum, TLS 1.3 on, Always Use HTTPS, SSL mode `strict` (valid because
+the origin is Pages, which presents a real certificate).
 
 CI runs gitleaks on every push. This repository is public, so that gate is not optional.

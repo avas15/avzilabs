@@ -20,7 +20,7 @@ export const SITE = {
  * development" notice and every interactive surface is presented as not yet
  * open. No service origins are referenced anywhere until the backend exists.
  */
-export const UNDER_DEVELOPMENT = true;
+export const UNDER_DEVELOPMENT = false;
 
 export const SOCIAL = {
   github: 'https://github.com/avas15',

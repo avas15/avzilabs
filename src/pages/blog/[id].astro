@@ -1,7 +1,6 @@
 ---
 import { getCollection, render } from 'astro:content';
 import type { GetStaticPaths } from 'astro';
-import { Icon } from 'astro-icon/components';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import { SITE } from '@/config';
 
@@ -44,10 +43,9 @@ const toc = headings.filter((h) => h.depth === 2);
   <article class="mx-auto max-w-4xl px-5 pt-32 sm:px-8 sm:pt-40">
     <a
       href="/blog"
-      class="inline-flex items-center gap-1.5 text-sm text-ink-3 transition-colors duration-150 hover:text-brand"
+      class="text-[13px] text-ink-3 transition-colors duration-150 hover:text-brand"
     >
-      <Icon name="lucide:arrow-right" class="h-3.5 w-3.5 rotate-180" stroke-width={1.75} />
-      All posts
+      &lt;&lt; cd ../blog
     </a>
 
     <header class="mt-6">
@@ -61,17 +59,15 @@ const toc = headings.filter((h) => h.depth === 2);
             })
           }
         </time>
-        {
-          d.tags.map((t) => (
-            <span class="rounded border border-line px-1.5 py-0.5 text-[11px] text-ink-3">{t}</span>
-          ))
-        }
+        {d.tags.map((t) => <span class="tag">{t}</span>)}
       </div>
 
-      <h1 class="mt-4 text-4xl font-800 leading-tight tracking-tight text-ink sm:text-5xl">
+      <h1
+        class="glow mt-4 text-2xl font-800 leading-tight tracking-tight text-brand sm:text-3xl"
+      >
         {d.title}
       </h1>
-      <p class="mt-4 text-lg leading-relaxed text-ink-2">{d.description}</p>
+      <p class="mt-4 leading-relaxed text-ink-2">{d.description}</p>
     </header>
 
     <div class="mt-12 grid gap-12 lg:grid-cols-[1fr_14rem]">
@@ -82,7 +78,7 @@ const toc = headings.filter((h) => h.depth === 2);
       {
         toc.length > 1 && (
           <aside class="order-first lg:order-last lg:sticky lg:top-24 lg:self-start">
-            <h2 class="text-xs font-600 uppercase tracking-wider text-ink-3">On this page</h2>
+            <h2 class="text-[11px] uppercase tracking-[0.2em] text-ink-3">// on this page</h2>
             <ul class="mt-4 space-y-2 border-l border-line">
               {toc.map((h) => (
                 <li>

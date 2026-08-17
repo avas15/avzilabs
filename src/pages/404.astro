@@ -1,31 +1,41 @@
 ---
-import { Icon } from 'astro-icon/components';
 import BaseLayout from '@/layouts/BaseLayout.astro';
+
+const ART = String.raw`
+ ██╗  ██╗ ██████╗ ██╗  ██╗
+ ██║  ██║██╔═████╗██║  ██║
+ ███████║██║██╔██║███████║
+ ╚════██║████╔╝██║╚════██║
+      ██║╚██████╔╝     ██║
+      ╚═╝ ╚═════╝      ╚═╝`;
 ---
 
 <BaseLayout title="Page not found" noindex>
-  <section class="mx-auto flex min-h-[70vh] max-w-3xl flex-col justify-center px-5 sm:px-8">
-    <p class="text-sm font-600 uppercase tracking-wider text-brand tnum">404</p>
-    <h1 class="mt-4 text-4xl font-800 tracking-tight text-ink sm:text-5xl">
+  <section class="mx-auto flex min-h-[75vh] max-w-3xl flex-col justify-center px-5 sm:px-8">
+    <pre
+      aria-label="404"
+      class="ascii text-[9px] leading-[1.1] text-brand sm:text-sm">{ART}</pre>
+
+    <h1 class="mt-8 text-2xl font-800 tracking-tight text-ink sm:text-3xl">
       No lot matching that bid.
     </h1>
-    <p class="mt-4 max-w-xl text-lg leading-relaxed text-ink-2">
+    <p class="mt-4 max-w-xl leading-relaxed text-ink-2">
       The page you asked for does not exist, or it moved. The work and the writing are both
       still where you left them.
     </p>
-    <div class="mt-8 flex flex-wrap gap-3">
+
+    <div class="mt-8 flex flex-wrap gap-2">
       <a
         href="/"
-        class="inline-flex items-center gap-2 rounded-md bg-brand px-5 py-3 text-sm font-600 text-on-brand transition-colors duration-150 hover:bg-brand-hover"
+        class="border border-brand bg-brand px-5 py-2.5 text-[13px] font-700 text-on-brand transition-colors duration-150 hover:bg-transparent hover:text-brand"
       >
-        Back home
-        <Icon name="lucide:arrow-right" class="h-4 w-4" stroke-width={1.75} />
+        [ cd ~ ]
       </a>
       <a
         href="/projects"
-        class="inline-flex items-center gap-2 rounded-md border border-line-strong px-5 py-3 text-sm font-500 text-ink-2 transition-colors duration-150 hover:border-brand hover:text-ink"
+        class="border border-line-strong px-5 py-2.5 text-[13px] text-ink-2 transition-colors duration-150 hover:border-brand hover:text-brand"
       >
-        See the work
+        [ ls ./work ]
       </a>
     </div>
   </section>

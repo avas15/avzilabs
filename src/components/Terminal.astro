@@ -1,0 +1,282 @@
+---
+interface Props {
+  projects: { title: string; id: string; kind: string; status: string; year: number }[];
+  posts: { title: string; id: string }[];
+}
+
+const { projects, posts } = Astro.props;
+const data = JSON.stringify({ projects, posts });
+---
+
+<section aria-labelledby="term-heading" class="mx-auto max-w-7xl px-5 pt-24 sm:px-8">
+  <div class="mb-5 flex items-center gap-3" data-reveal>
+    <h2 id="term-heading" class="text-xs uppercase tracking-[0.2em] text-ink-3">
+      [ interactive ]
+    </h2>
+    <div class="rule-ascii flex-1 text-xs">
+      ────────────────────────────────────────────────────────────────────────────────
+    </div>
+  </div>
+
+  <div class="term term-corners" data-reveal data-reveal-delay="60">
+    <div class="term-bar">
+      <span class="text-brand">●</span>
+      <span>avas@avzilabs: ~</span>
+      <span class="ml-auto hidden sm:inline">type `help` to begin</span>
+    </div>
+
+    <!-- Clicking anywhere in the body focuses the input, like a real terminal. -->
+    <div data-term-body class="h-[22rem] cursor-text overflow-y-auto p-4 text-[13px] leading-relaxed sm:h-[26rem]">
+      <div data-term-log aria-live="polite" aria-atomic="false"></div>
+
+      <form data-term-form class="mt-1 flex items-center gap-2">
+        <label for="term-input" class="shrink-0 text-brand">visitor@avzilabs:~$</label>
+        <input
+          id="term-input"
+          data-term-input
+          type="text"
+          autocomplete="off"
+          autocapitalize="off"
+          autocorrect="off"
+          spellcheck="false"
+          class="min-w-0 flex-1 border-0 bg-transparent p-0 text-ink outline-none placeholder:text-ink-3 focus:ring-0"
+          placeholder="help"
+          aria-label="Terminal command input"
+        />
+      </form>
+    </div>
+  </div>
+
+  <p class="mt-3 text-xs text-ink-3">
+    Not a real shell. It cannot touch anything, and that is rather the point.
+  </p>
+</section>
+
+<script is:inline set:html={`window.__AVZI = ${data};`} />
+
+<script>
+  interface TermData {
+    projects: { title: string; id: string; kind: string; status: string; year: number }[];
+    posts: { title: string; id: string }[];
+  }
+
+  const DATA: TermData = (window as any).__AVZI ?? { projects: [], posts: [] };
+
+  const BANNER = String.raw`
+    _    __     ______ _____ _        _    ____ ____
+   / \  \ \   / /_  _|_   _| |      / \  | __ ) ___|
+  / _ \  \ \ / /  | |   | | | |    / _ \ |  _ \___ \
+ / ___ \  \ V /  _| |_  | | | |__ / ___ \| |_) |__) |
+/_/   \_\  \_/  |_____| |_| |_____/_/   \_\____/____/
+`;
+
+  const el = {
+    body: document.querySelector<HTMLElement>('[data-term-body]'),
+    log: document.querySelector<HTMLElement>('[data-term-log]'),
+    form: document.querySelector<HTMLFormElement>('[data-term-form]'),
+    input: document.querySelector<HTMLInputElement>('[data-term-input]'),
+  };
+
+  if (el.body && el.log && el.form && el.input) {
+    const history: string[] = [];
+    let historyIndex = -1;
+
+    function write(html: string, cls = '') {
+      const line = document.createElement('div');
+      if (cls) line.className = cls;
+      line.innerHTML = html;
+      el.log!.appendChild(line);
+      el.body!.scrollTop = el.body!.scrollHeight;
+    }
+
+    function esc(s: string) {
+      return s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]!);
+    }
+
+    const COMMANDS: Record<string, { desc: string; run: (args: string[]) => void }> = {
+      help: {
+        desc: 'list available commands',
+        run: () => {
+          write('Available commands:', 'text-[var(--brand)]');
+          Object.entries(COMMANDS).forEach(([name, c]) => {
+            write(`  <span class="text-[var(--brand)]">${name.padEnd(10)}</span><span class="text-ink-3">${esc(c.desc)}</span>`);
+          });
+        },
+      },
+      whoami: {
+        desc: 'about the author',
+        run: () => {
+          write('avas saeed');
+          write('<span class="text-ink-3">spectrum auction analyst by day. games, data tools and</span>');
+          write('<span class="text-ink-3">small useful software the rest of the time.</span>');
+          write('');
+          write('  <span class="text-ink-3">focus  </span> auction design, multiplayer netcode, benchmarking');
+          write('  <span class="text-ink-3">stack  </span> typescript, python, c#, unity, postgres');
+        },
+      },
+      projects: {
+        desc: 'list projects',
+        run: () => {
+          if (!DATA.projects.length) return write('no projects indexed.', 'text-ink-3');
+          write(
+            `<span class="text-ink-3">${'NAME'.padEnd(24)}${'KIND'.padEnd(11)}${'STATUS'.padEnd(17)}YEAR</span>`
+          );
+          DATA.projects.forEach((p) => {
+            write(
+              `<a class="text-[var(--brand)] hover:underline" href="/projects/${p.id}">${esc(p.title).padEnd(24)}</a><span class="text-ink-2">${p.kind.padEnd(11)}${p.status.padEnd(17)}${p.year}</span>`
+            );
+          });
+        },
+      },
+      blog: {
+        desc: 'list writing',
+        run: () => {
+          if (!DATA.posts.length) return write('nothing published yet.', 'text-ink-3');
+          DATA.posts.forEach((p) =>
+            write(`  <a class="text-[var(--brand)] hover:underline" href="/blog/${p.id}">${esc(p.title)}</a>`)
+          );
+        },
+      },
+      ls: {
+        desc: 'list site sections',
+        run: () => {
+          write(
+            '  <a class="text-[var(--brand)] hover:underline" href="/projects">projects/</a>   <a class="text-[var(--brand)] hover:underline" href="/blog">blog/</a>   <a class="text-[var(--brand)] hover:underline" href="/play">play/</a>   <a class="text-[var(--brand)] hover:underline" href="/tools">tools/</a>'
+          );
+        },
+      },
+      contact: {
+        desc: 'how to reach me',
+        run: () => {
+          write('  email   <a class="text-[var(--brand)] hover:underline" href="mailto:avas.saeed@gmail.com">avas.saeed@gmail.com</a>');
+          write('  github  <a class="text-[var(--brand)] hover:underline" href="https://github.com/avas15">github.com/avas15</a>');
+        },
+      },
+      neofetch: {
+        desc: 'system information',
+        run: () => {
+          const rows = [
+            ['host', 'avzilabs.com'],
+            ['os', 'static/astro'],
+            ['edge', 'cloudflare pages'],
+            ['uptime', 'since you loaded this'],
+            ['cost', 'under EUR 13/month'],
+            ['theme', 'phosphor green on black'],
+          ];
+          write('<pre class="ascii text-[var(--brand)] text-[10px] sm:text-xs">' + esc(BANNER) + '</pre>');
+          rows.forEach(([k, v]) =>
+            write(`  <span class="text-[var(--brand)]">${k.padEnd(8)}</span><span class="text-ink-2">${v}</span>`)
+          );
+        },
+      },
+      matrix: {
+        desc: 'follow the white rabbit',
+        run: () => {
+          document.documentElement.classList.toggle('matrix-max');
+          const on = document.documentElement.classList.contains('matrix-max');
+          write(on ? 'wake up, neo...' : 'back to the desert of the real.', 'text-[var(--brand)]');
+        },
+      },
+      theme: {
+        desc: 'toggle light / dark',
+        run: () => {
+          const root = document.documentElement;
+          const next = root.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+          root.setAttribute('data-theme', next);
+          try {
+            localStorage.setItem('avzi-theme', next);
+          } catch (e) {}
+          write(`theme set to ${next}.`, 'text-ink-3');
+        },
+      },
+      sudo: {
+        desc: 'nice try',
+        run: () => write('visitor is not in the sudoers file. This incident has been reported.', 'text-[var(--danger)]'),
+      },
+      clear: {
+        desc: 'clear the screen',
+        run: () => {
+          el.log!.innerHTML = '';
+        },
+      },
+    };
+
+    function run(raw: string) {
+      const trimmed = raw.trim();
+      write(
+        `<span class="text-[var(--brand)]">visitor@avzilabs:~$</span> <span class="text-ink">${esc(trimmed)}</span>`
+      );
+      if (!trimmed) return;
+
+      const [name, ...args] = trimmed.split(/\s+/);
+      const cmd = COMMANDS[name.toLowerCase()];
+      if (cmd) cmd.run(args);
+      else
+        write(
+          `command not found: ${esc(name)}. try <span class="text-[var(--brand)]">help</span>.`,
+          'text-ink-3'
+        );
+      write('');
+    }
+
+    el.form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const value = el.input!.value;
+      if (value.trim()) {
+        history.push(value);
+        historyIndex = history.length;
+      }
+      run(value);
+      el.input!.value = '';
+    });
+
+    // Up/down through history, like any shell.
+    el.input.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        if (historyIndex > 0) el.input!.value = history[--historyIndex] ?? '';
+      } else if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        if (historyIndex < history.length - 1) el.input!.value = history[++historyIndex] ?? '';
+        else {
+          historyIndex = history.length;
+          el.input!.value = '';
+        }
+      }
+    });
+
+    el.body.addEventListener('click', (e) => {
+      // Do not steal focus when the user is trying to click a link.
+      if ((e.target as HTMLElement).closest('a')) return;
+      el.input!.focus();
+    });
+
+    // Opening line, written once the section is first scrolled into view so it
+    // is not already stale by the time anyone looks at it.
+    let greeted = false;
+    new IntersectionObserver(
+      (entries) => {
+        if (greeted || !entries.some((x) => x.isIntersecting)) return;
+        greeted = true;
+        write('<pre class="ascii text-[var(--brand)] text-[10px] sm:text-xs">' + esc(BANNER) + '</pre>');
+        write('<span class="text-ink-3">Connected. 15 documents indexed.</span>');
+        write(
+          '<span class="text-ink-3">Type </span><span class="text-[var(--brand)]">help</span><span class="text-ink-3"> for commands.</span>'
+        );
+        write('');
+      },
+      { threshold: 0.25 }
+    ).observe(el.body);
+  }
+</script>
+
+<style is:global>
+  /* `matrix` command turns the rain up and pushes the whole page green. */
+  html.matrix-max [data-matrix-rain] {
+    opacity: 1 !important;
+  }
+  html.matrix-max {
+    --text-2: #5cf87e;
+    --text-3: #00a82d;
+  }
+</style>

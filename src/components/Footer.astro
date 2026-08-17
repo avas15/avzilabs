@@ -1,5 +1,4 @@
 ---
-import { Icon } from 'astro-icon/components';
 import { NAV, SITE, SOCIAL } from '@/config';
 
 const year = new Date().getFullYear();
@@ -7,13 +6,15 @@ const year = new Date().getFullYear();
 
 <footer class="mt-24 border-t border-line">
   <div class="mx-auto max-w-7xl px-5 py-12 sm:px-8">
+    <div class="rule-ascii mb-10 text-xs">
+      ┌───────────────────────────────────────────────────────────────────────────────────────┐
+    </div>
+
     <div class="flex flex-col gap-10 md:flex-row md:items-start md:justify-between">
       <div class="max-w-sm">
-        <div class="flex items-center gap-2.5">
-          <span class="hero-gradient grid h-8 w-8 place-items-center rounded-md">
-            <span class="text-sm font-800 tracking-tight text-white">A</span>
-          </span>
-          <span class="text-[15px] font-600 tracking-tight text-ink">{SITE.name}</span>
+        <div class="flex items-center gap-2">
+          <span class="text-brand">▓</span>
+          <span class="text-sm font-700 tracking-tight text-ink">avzilabs<span class="text-brand">_</span></span>
         </div>
         <p class="mt-4 text-sm leading-relaxed text-ink-3">
           {SITE.tagline}
@@ -22,8 +23,8 @@ const year = new Date().getFullYear();
 
       <div class="flex gap-14">
         <div>
-          <h2 class="text-xs font-600 uppercase tracking-wider text-ink-3">Site</h2>
-          <ul class="mt-4 space-y-2.5">
+          <h2 class="text-[11px] uppercase tracking-[0.2em] text-ink-3">/site</h2>
+          <ul class="mt-4 space-y-2">
             {
               NAV.map((item) => (
                 <li>
@@ -31,7 +32,7 @@ const year = new Date().getFullYear();
                     href={item.href}
                     class="text-sm text-ink-2 transition-colors duration-150 hover:text-brand"
                   >
-                    {item.label}
+                    <span class="text-ink-3">&gt;</span> {item.label.toLowerCase()}
                   </a>
                 </li>
               ))
@@ -40,34 +41,31 @@ const year = new Date().getFullYear();
         </div>
 
         <div>
-          <h2 class="text-xs font-600 uppercase tracking-wider text-ink-3">Elsewhere</h2>
-          <ul class="mt-4 space-y-2.5">
+          <h2 class="text-[11px] uppercase tracking-[0.2em] text-ink-3">/elsewhere</h2>
+          <ul class="mt-4 space-y-2">
             <li>
               <a
                 href={SOCIAL.github}
                 rel="me noopener"
-                class="inline-flex items-center gap-2 text-sm text-ink-2 transition-colors duration-150 hover:text-brand"
+                class="text-sm text-ink-2 transition-colors duration-150 hover:text-brand"
               >
-                <Icon name="lucide:github" class="h-4 w-4" stroke-width={1.5} />
-                GitHub
+                <span class="text-ink-3">&gt;</span> github
               </a>
             </li>
             <li>
               <a
                 href={`mailto:${SOCIAL.email}`}
-                class="inline-flex items-center gap-2 text-sm text-ink-2 transition-colors duration-150 hover:text-brand"
+                class="text-sm text-ink-2 transition-colors duration-150 hover:text-brand"
               >
-                <Icon name="lucide:mail" class="h-4 w-4" stroke-width={1.5} />
-                Email
+                <span class="text-ink-3">&gt;</span> email
               </a>
             </li>
             <li>
               <a
                 href="/rss.xml"
-                class="inline-flex items-center gap-2 text-sm text-ink-2 transition-colors duration-150 hover:text-brand"
+                class="text-sm text-ink-2 transition-colors duration-150 hover:text-brand"
               >
-                <Icon name="lucide:rss" class="h-4 w-4" stroke-width={1.5} />
-                RSS
+                <span class="text-ink-3">&gt;</span> rss
               </a>
             </li>
           </ul>
@@ -76,8 +74,8 @@ const year = new Date().getFullYear();
     </div>
 
     <div class="mt-12 border-t border-line pt-6">
-      <p class="text-xs text-ink-3 tnum">
-        {year} {SITE.author}. Built with Astro, served from the edge.
+      <p class="text-[11px] text-ink-3 tnum">
+        <span class="text-brand">&gt;</span> {year} {SITE.author} — built with astro, served from the edge
       </p>
     </div>
   </div>

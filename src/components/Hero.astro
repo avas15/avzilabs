@@ -1,80 +1,91 @@
 ---
-import { Icon } from 'astro-icon/components';
+import MatrixRain from '@/components/MatrixRain.astro';
 
 interface Props {
-  /** Counts shown in the stat strip, computed from the collections. */
   stats: { label: string; value: string }[];
 }
 
 const { stats } = Astro.props;
+
+const LOGO = String.raw`
+ ▄▄▄· ▌ ▐·▄▄▄▄▄▪  ▄▄▌   ▄▄▄· ▄▄▄▄· .▄▄ ·
+▐█ ▀█ ▪█·█▌•██  ██ ██•  ▐█ ▀█ ▐█ ▀█▪ ▐█ ▀.
+▄█▀▀█ ▐█▐█• ▐█.▪▐█·██▪  ▄█▀▀█ ▐█▀▀█▄ ▄▀▀▀█▄
+▐█ ▪▐▌ ███ ▪▐█▌·▐█▌▐█▌▐▌▐█ ▪▐▌██▄▪▐█ ▐█▄▪▐█
+ ▀  ▀ . ▀   ▀▀▀ ▀▀▀.▀▀▀  ▀  ▀ ·▀▀▀▀   ▀▀▀▀`;
+
+// Written as data so the boot sequence stays declarative and easy to retime.
+const BOOT = [
+  { text: 'initialising avzilabs kernel', tag: 'OK' },
+  { text: 'mounting /projects /blog /play /tools', tag: 'OK' },
+  { text: 'establishing edge connection', tag: 'OK' },
+  { text: 'decrypting operator profile', tag: 'OK' },
+];
 ---
 
-<section data-hero class="relative overflow-hidden pt-32 pb-20 sm:pt-40 sm:pb-28">
-  {/*
-    Backdrop is pure CSS. No image request, so the hero cannot hurt LCP -
-    the largest paint here is the headline text, which ships in the HTML.
-  */}
-  <div data-hero-backdrop aria-hidden="true" class="pointer-events-none absolute inset-0 -z-10">
+<section data-hero class="relative overflow-hidden pt-28 pb-20 sm:pt-36 sm:pb-28">
+  <div class="pointer-events-auto absolute inset-0 -z-10" data-hero-backdrop>
+    <MatrixRain opacity={0.55} />
+    <!-- Fade the rain into the page so body copy below stays readable. -->
     <div
-      class="absolute left-1/2 top-[-18rem] h-[38rem] w-[62rem] -translate-x-1/2 rounded-full opacity-[0.16] blur-[120px]"
-      style="background: radial-gradient(closest-side, #FA8334, transparent 72%);"
-    >
-    </div>
-    <div
-      class="absolute right-[-14rem] top-[8rem] h-[30rem] w-[34rem] rounded-full opacity-[0.12] blur-[110px]"
-      style="background: radial-gradient(closest-side, #1B4A75, transparent 72%);"
+      aria-hidden="true"
+      class="absolute inset-0 bg-gradient-to-b from-transparent via-bg/70 to-bg"
     >
     </div>
   </div>
 
   <div class="mx-auto max-w-7xl px-5 sm:px-8">
-    <p
-      data-hero-fade
-      class="flex items-center gap-2.5 text-xs font-600 uppercase tracking-wider text-ink-3"
-    >
-      <span class="inline-block h-1.5 w-1.5 rounded-full bg-brand"></span>
-      Spectrum auctions, games, and small useful software
-    </p>
+    <pre
+      data-hero-logo
+      aria-label="AVZILABS"
+      class="ascii mb-8 text-[7px] leading-[1.15] text-brand sm:text-[11px] md:text-[13px]">{LOGO}</pre>
 
-    <h1 class="mt-7 max-w-4xl text-4xl font-800 leading-[1.05] tracking-tight sm:text-6xl lg:text-7xl">
+    <ol data-boot class="mb-9 space-y-0.5 text-xs sm:text-[13px]" aria-label="Boot sequence">
+      {
+        BOOT.map((b) => (
+          <li data-boot-line class="flex items-center gap-2 text-ink-3">
+            <span class="text-brand">[{b.tag}]</span>
+            <span>{b.text}</span>
+          </li>
+        ))
+      }
+    </ol>
+
+    <h1
+      class="max-w-4xl text-[26px] font-700 leading-[1.25] tracking-tight sm:text-4xl lg:text-5xl"
+    >
       <span data-hero-line class="block text-ink">I build the systems</span>
       <span data-hero-line class="block text-ink">that decide who wins</span>
-      <span data-hero-line class="block">
-        <span
-          class="bg-gradient-to-r from-pumpkin-300 via-pumpkin-400 to-pumpkin-600 bg-clip-text text-transparent"
-        >
-          the airwaves.
-        </span>
-      </span>
+      <span data-hero-line class="glow block text-brand">the airwaves.</span>
     </h1>
 
     <div
       data-hero-rule
       aria-hidden="true"
-      class="mt-10 h-px w-full max-w-2xl origin-left bg-gradient-to-r from-pumpkin-500 via-line to-transparent"
+      class="rule-ascii mt-8 max-w-3xl origin-left text-xs"
     >
+      ════════════════════════════════════════════════════════════════════════════════════
     </div>
 
-    <p data-hero-fade class="mt-8 max-w-2xl text-lg leading-relaxed text-ink-2">
-      I am Avas Saeed. By day I run spectrum auction strategy and build the platforms that
-      support it. The rest of the time I make games, data tools, and things that should not
-      have needed an ad-blocker to use.
+    <p data-hero-fade class="mt-7 max-w-2xl leading-relaxed text-ink-2">
+      <span class="text-brand">$</span> whoami <br />
+      Avas Saeed. By day I run spectrum auction strategy and build the platforms that support
+      it. The rest of the time I make games, data tools, and things that should not have needed
+      an ad-blocker to use.
     </p>
 
     <div data-hero-fade class="mt-9 flex flex-wrap items-center gap-3">
       <a
         href="/projects"
-        class="inline-flex items-center gap-2 rounded-md bg-brand px-5 py-3 text-sm font-600 text-on-brand transition-colors duration-150 hover:bg-brand-hover"
+        class="border border-brand bg-brand px-5 py-2.5 text-sm font-700 text-on-brand transition-colors duration-150 hover:bg-transparent hover:text-brand"
       >
-        See the work
-        <Icon name="lucide:arrow-right" class="h-4 w-4" stroke-width={1.75} />
+        [ see the work ]
       </a>
       <a
         href="/play"
-        class="inline-flex items-center gap-2 rounded-md border border-line-strong px-5 py-3 text-sm font-500 text-ink-2 transition-colors duration-150 hover:border-brand hover:text-ink"
+        class="border border-line-strong px-5 py-2.5 text-sm text-ink-2 transition-colors duration-150 hover:border-brand hover:text-brand"
       >
-        <Icon name="lucide:play" class="h-4 w-4" stroke-width={1.75} />
-        Play something
+        [ play something ]
       </a>
     </div>
 
@@ -82,12 +93,12 @@ const { stats } = Astro.props;
       stats.length > 0 && (
         <dl
           data-hero-fade
-          class="mt-16 grid max-w-2xl grid-cols-2 gap-px overflow-hidden rounded-lg border border-line bg-line sm:grid-cols-4"
+          class="term mt-14 grid max-w-3xl grid-cols-2 border-line sm:grid-cols-4"
         >
           {stats.map((s) => (
-            <div class="bg-bg px-4 py-4">
-              <dd class="text-2xl font-700 tracking-tight text-ink tnum">{s.value}</dd>
-              <dt class="mt-1 text-xs text-ink-3">{s.label}</dt>
+            <div class="border-b border-r border-line p-4 last:border-r-0">
+              <dd class="text-xl font-700 text-brand tnum">{s.value}</dd>
+              <dt class="mt-0.5 text-[11px] uppercase tracking-wider text-ink-3">{s.label}</dt>
             </div>
           ))}
         </dl>

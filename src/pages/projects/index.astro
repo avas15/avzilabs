@@ -15,21 +15,19 @@ const kinds = [...new Set(projects.map((p) => p.data.kind))];
   description="Spectrum auction platforms, multiplayer games, data tools and prototypes built by Avas Saeed."
 >
   <section class="mx-auto max-w-7xl px-5 pt-32 sm:px-8 sm:pt-40">
-    <h1 class="text-4xl font-800 tracking-tight text-ink sm:text-5xl" data-reveal>Work</h1>
-    <p class="mt-4 max-w-2xl text-lg leading-relaxed text-ink-2" data-reveal data-reveal-delay="60">
+    <h1 class="glow text-3xl font-800 tracking-tight text-brand sm:text-4xl" data-reveal>
+      ./work
+    </h1>
+    <p class="mt-4 max-w-2xl leading-relaxed text-ink-2" data-reveal data-reveal-delay="60">
       Auction engines and operator consoles from the day job, games from the evenings, and tools
       built because the alternative was three pop-ups and a rate limit.
     </p>
 
-    <ul class="mt-8 flex flex-wrap gap-2" data-reveal data-reveal-delay="120">
-      {
-        kinds.map((k) => (
-          <li class="rounded border border-line px-2.5 py-1 text-[11px] font-500 uppercase tracking-wider text-ink-3">
-            {k}
-          </li>
-        ))
-      }
-    </ul>
+    <div class="mt-6 flex flex-wrap items-center gap-2" data-reveal data-reveal-delay="120">
+      <span class="text-[11px] uppercase tracking-wider text-ink-3">filter:</span>
+      {kinds.map((k) => <span class="tag">{k}</span>)}
+      <span class="text-[11px] text-ink-3 tnum">({projects.length} total)</span>
+    </div>
 
     <div data-reveal-group class="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
       {projects.map((p, i) => <ProjectCard project={p} eager={i < 3} />)}

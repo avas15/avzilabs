@@ -98,34 +98,89 @@ function init() {
   if (hero) {
     const tl = gsap.timeline({ defaults: { ease: 'expo.out' } });
 
+    // 1. The ASCII wordmark resolves in, like a slow CRT warming up.
+    const logo = hero.querySelector('[data-hero-logo]');
+    if (logo) {
+      tl.fromTo(
+        logo,
+        { opacity: 0, filter: 'blur(6px)' },
+        { opacity: 1, filter: 'blur(0px)', duration: 0.9 }
+      );
+    }
+
+    // 2. Boot lines print one at a time, terminal style.
+    const bootLines = hero.querySelectorAll('[data-boot-line]');
+    if (bootLines.length) {
+      tl.fromTo(
+        bootLines,
+        { opacity: 0, x: -8 },
+        { opacity: 1, x: 0, duration: 0.22, stagger: 0.13, ease: 'none' },
+        '-=0.35'
+      );
+    }
+
     tl.fromTo(
       hero.querySelectorAll('[data-hero-line]'),
-      { opacity: 0, y: 28 },
-      { opacity: 1, y: 0, duration: 0.9, stagger: 0.09 }
+      { opacity: 0, y: 24 },
+      { opacity: 1, y: 0, duration: 0.8, stagger: 0.09 },
+      '-=0.15'
     )
-      .fromTo(
-        hero.querySelectorAll('[data-hero-fade]'),
-        { opacity: 0, y: 16 },
-        { opacity: 1, y: 0, duration: 0.7, stagger: 0.07 },
-        '-=0.5'
-      )
       .fromTo(
         hero.querySelectorAll('[data-hero-rule]'),
         { scaleX: 0 },
         { scaleX: 1, duration: 1.1, transformOrigin: 'left center' },
-        '-=0.8'
+        '-=0.6'
+      )
+      .fromTo(
+        hero.querySelectorAll('[data-hero-fade]'),
+        { opacity: 0, y: 14 },
+        { opacity: 1, y: 0, duration: 0.6, stagger: 0.08 },
+        '-=0.85'
       );
 
-    // Parallax drift on the hero backdrop as the page scrolls away.
+    /*
+      Fade the rain out as the hero leaves rather than parallaxing it. The
+      canvas is already animating internally, and translating it as well reads
+      as two competing motions.
+    */
     const backdrop = hero.querySelector('[data-hero-backdrop]');
     if (backdrop) {
       gsap.to(backdrop, {
-        yPercent: 16,
+        opacity: 0.25,
         ease: 'none',
         scrollTrigger: { trigger: hero, start: 'top top', end: 'bottom top', scrub: true },
       });
     }
   }
+
+  // --- Section headings type themselves in ---------------------------------
+  gsap.utils.toArray<HTMLElement>('[data-typewriter]').forEach((el) => {
+    const full = el.textContent ?? '';
+    if (!full) return;
+    const state = { n: 0 };
+
+    ScrollTrigger.create({
+      trigger: el,
+      start: 'top 85%',
+      once: true,
+      onEnter: () => {
+        el.textContent = '';
+        el.classList.add('caret');
+        gsap.to(state, {
+          n: full.length,
+          duration: Math.min(1.1, full.length * 0.035),
+          ease: 'none',
+          onUpdate: () => {
+            el.textContent = full.slice(0, Math.round(state.n));
+          },
+          onComplete: () => {
+            el.textContent = full;
+            el.classList.remove('caret');
+          },
+        });
+      },
+    });
+  });
 
   // --- Header state --------------------------------------------------------
   const header = document.querySelector<HTMLElement>('[data-header]');

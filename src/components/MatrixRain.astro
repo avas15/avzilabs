@@ -1,0 +1,196 @@
+---
+interface Props {
+  /** Extra classes for positioning the canvas. */
+  class?: string;
+  /** 0-1. How much of the container the rain covers before fading out. */
+  opacity?: number;
+}
+
+const { class: className = '', opacity = 0.5 } = Astro.props;
+---
+
+<canvas
+  data-matrix-rain
+  data-opacity={opacity}
+  class:list={['pointer-events-none absolute inset-0 h-full w-full', className]}
+  aria-hidden="true"
+></canvas>
+
+<script>
+  /*
+    Digital rain.
+
+    Deliberately cheap: one canvas, a per-column head position, and a
+    translucent black fill each frame to produce the trail instead of tracking
+    individual glyph lifetimes. That keeps it to one fillRect plus one fillText
+    per column per frame.
+
+    It stops entirely when off-screen or when the tab is hidden, so it costs
+    nothing while you are reading further down the page.
+  */
+  const CHARS =
+    'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ<>[]{}/\\|=+*#$%&@';
+
+  const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  function initCanvas(canvas: HTMLCanvasElement) {
+    const ctx = canvas.getContext('2d', { alpha: true });
+    if (!ctx) return;
+
+    const baseOpacity = Number(canvas.dataset.opacity ?? 0.5);
+
+    let width = 0;
+    let height = 0;
+    let fontSize = 14;
+    let columns = 0;
+    let drops: number[] = [];
+    let speeds: number[] = [];
+    let dpr = 1;
+
+    // Pointer influence, in canvas pixels. -1 means "no pointer".
+    let pointerX = -1;
+    let pointerY = -1;
+
+    function resize() {
+      const rect = canvas.getBoundingClientRect();
+      if (rect.width === 0 || rect.height === 0) return;
+
+      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      width = rect.width;
+      height = rect.height;
+      canvas.width = Math.floor(width * dpr);
+      canvas.height = Math.floor(height * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+      fontSize = width < 640 ? 12 : 14;
+      columns = Math.ceil(width / fontSize);
+
+      drops = new Array(columns).fill(0).map(() => Math.random() * -50);
+      speeds = new Array(columns).fill(0).map(() => 0.4 + Math.random() * 0.55);
+
+      ctx.fillStyle = '#000';
+      ctx.fillRect(0, 0, width, height);
+    }
+
+    function draw() {
+      // The trail: fade what is already there rather than clearing.
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.075)';
+      ctx.fillRect(0, 0, width, height);
+
+      ctx.font = `${fontSize}px "JetBrains Mono Variable", ui-monospace, monospace`;
+      ctx.textBaseline = 'top';
+
+      for (let i = 0; i < columns; i++) {
+        const x = i * fontSize;
+        const y = drops[i] * fontSize;
+
+        // Fade the rain out toward the bottom so text over it stays readable.
+        const depthFade = 1 - Math.min(1, Math.max(0, y / height) * 0.85);
+
+        // Columns near the cursor brighten and accelerate.
+        let boost = 0;
+        if (pointerX >= 0) {
+          const dx = Math.abs(x - pointerX);
+          const dy = Math.abs(y - pointerY);
+          if (dx < 120 && dy < 160) {
+            boost = (1 - dx / 120) * (1 - dy / 160);
+          }
+        }
+
+        const char = CHARS[(Math.random() * CHARS.length) | 0];
+
+        // Leading glyph is near-white, the classic look.
+        const headAlpha = Math.min(1, (0.85 + boost * 0.15) * depthFade * baseOpacity * 2);
+        ctx.fillStyle = `rgba(${180 + boost * 75}, 255, ${200 + boost * 55}, ${headAlpha})`;
+        ctx.fillText(char, x, y);
+
+        // A dimmer glyph just behind it gives the column body some weight.
+        if (drops[i] > 1) {
+          ctx.fillStyle = `rgba(0, 255, 65, ${0.5 * depthFade * baseOpacity})`;
+          ctx.fillText(CHARS[(Math.random() * CHARS.length) | 0], x, y - fontSize);
+        }
+
+        drops[i] += speeds[i] + boost * 1.4;
+
+        // Recycle the column once it clears the bottom, with a random gap so
+        // the columns do not resynchronise into visible bands.
+        if (y > height && Math.random() > 0.975) {
+          drops[i] = Math.random() * -20;
+          speeds[i] = 0.4 + Math.random() * 0.55;
+        }
+      }
+    }
+
+    let rafId = 0;
+    let running = false;
+
+    function loop() {
+      draw();
+      rafId = requestAnimationFrame(loop);
+    }
+
+    function start() {
+      if (running || prefersReduced.matches) return;
+      running = true;
+      loop();
+    }
+
+    function stop() {
+      if (!running) return;
+      running = false;
+      cancelAnimationFrame(rafId);
+    }
+
+    // Only run while actually on screen.
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) start();
+          else stop();
+        }
+      },
+      { threshold: 0.01 }
+    );
+    io.observe(canvas);
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) stop();
+      else if (canvas.getBoundingClientRect().top < window.innerHeight) start();
+    });
+
+    // Pointer tracking is on the parent, since the canvas itself is
+    // pointer-events: none and would never receive the events.
+    const host = canvas.parentElement ?? canvas;
+    host.addEventListener('pointermove', (e: PointerEvent) => {
+      const rect = canvas.getBoundingClientRect();
+      pointerX = e.clientX - rect.left;
+      pointerY = e.clientY - rect.top;
+    });
+    host.addEventListener('pointerleave', () => {
+      pointerX = -1;
+      pointerY = -1;
+    });
+
+    let resizeTimer = 0;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = window.setTimeout(resize, 150);
+    });
+
+    resize();
+
+    if (prefersReduced.matches) {
+      // Draw a single static frame so the area is not just empty black.
+      draw();
+    }
+  }
+
+  function boot() {
+    document
+      .querySelectorAll<HTMLCanvasElement>('canvas[data-matrix-rain]')
+      .forEach((c) => initCanvas(c));
+  }
+
+  if (document.readyState === 'complete') boot();
+  else window.addEventListener('load', boot, { once: true });
+</script>
