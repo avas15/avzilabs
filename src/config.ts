@@ -31,7 +31,7 @@ export const GAME_ORIGIN =
 
 export const SOCIAL = {
   github: 'https://github.com/avas15',
-  email: 'avas.saeed@gmail.com',
+  email: 'hello@avzilabs.com',
 } as const;
 
 export const NAV = [
