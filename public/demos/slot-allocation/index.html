@@ -76,6 +76,31 @@ ul.tight{margin:8px 0 0;padding-left:20px}
 ul.tight li{margin:3px 0}
 .pill{font-size:10px;padding:1px 7px;border-radius:999px;
   background:rgba(250,131,52,.14);color:var(--pumpkin-d);border:1px solid rgba(250,131,52,.3)}
+
+/* slot plan + expandable register */
+.legend{display:flex;flex-wrap:wrap;gap:12px}
+.legend .key{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)}
+.legend .key i{width:11px;height:11px;border-radius:2px;display:inline-block}
+#slotplan svg{display:block}
+#slotplan rect{transition:opacity .12s ease}
+#slotplan g:hover rect{opacity:.82}
+
+tr.row-head{cursor:pointer}
+tr.row-head:hover td{background:var(--code)}
+tr.row-head:focus-visible{outline:2px solid var(--pumpkin);outline-offset:-2px}
+tr.row-head td.chev{color:var(--muted);width:28px;text-align:center}
+tr.row-detail>td{background:var(--code);padding:0}
+.detail{padding:18px 16px}
+.detail-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));
+  gap:1px;background:var(--line);border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.detail-grid .stat{background:var(--surface);padding:10px 12px}
+.detail-grid .stat .k{font-size:11px;color:var(--muted)}
+.detail-grid .stat .v{font-size:15px;font-weight:600;margin-top:2px}
+.detail-cols{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:16px}
+.detail-cols h4{margin:0 0 6px;font-size:13px}
+ul.tight{margin:0;padding-left:16px}
+ul.tight li{font-size:12.5px;color:var(--muted);margin-bottom:4px}
+@media(max-width:720px){.detail-cols{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -296,19 +321,64 @@ source degraded — exiting cleanly</pre>
 </section>
 
 <section>
-  <h2><span class="num">05</span>Scheduled external feed</h2>
-  <p class="lede">A polling job with cache revalidation and graceful degradation.
-     Pulls from Wikipedia's public REST API — openly licensed and deliberately
-     unrelated to any client domain.</p>
-  <div class="grid g3" id="news"></div>
-  <p class="meta" style="margin-top:14px">ETag / <code>If-None-Match</code>
-     revalidation means an unchanged poll costs one 304 and no parsing. Offline,
-     it serves the cache and marks the run degraded rather than failing.
-     Content from Wikipedia, CC BY-SA 4.0.</p>
+<section>
+  <h2><span class="num">05</span>Slot plan</h2>
+  <p class="lede">The holdings view. Time of day runs left to right, and every
+     block is capacity a carrier actually holds in that window. Unallocated
+     capacity is drawn rather than omitted, because a gap in the plan is
+     information: it is where the next award has room.</p>
+
+  <div class="row" style="margin-bottom:12px">
+    <label for="sel-plan-market">Airport</label>
+    <select id="sel-plan-market"></select>
+    <span class="meta" id="plan-summary"></span>
+  </div>
+
+  <div class="card" style="padding:16px">
+    <div class="scroll"><div id="slotplan"></div></div>
+    <div id="plan-legend" class="legend" style="margin-top:12px"></div>
+  </div>
+
+  <p class="meta" style="margin-top:14px">Hovering a block gives the carrier,
+     the window and the holding. The same shape works for any divisible,
+     time- or position-indexed resource sold in blocks.</p>
 </section>
 
 <section>
-  <h2><span class="num">06</span>Other systems I've built</h2>
+  <h2><span class="num">06</span>Allocation register</h2>
+  <p class="lede">Every award, with the detail folded away. Click a row to open
+     it. Summary tables that hide their provenance are how a wrong number
+     survives review, so the expansion carries the assumptions, the source
+     reference and the arithmetic rather than a prettier restatement of the
+     row.</p>
+
+  <div class="scroll"><table id="tbl-alloc">
+    <thead><tr><th style="width:28px"></th><th>Award</th><th>Airport</th>
+      <th class="n">Year</th><th>Mechanism</th><th class="n">Slots</th>
+      <th class="n">Price / slot</th><th class="n">Proceeds</th></tr></thead>
+    <tbody></tbody></table></div>
+  <p class="meta" style="margin-top:14px">Rows are keyboard reachable and the
+     expanded panel is announced, so this is not a mouse-only affordance.</p>
+</section>
+
+  <h2><span class="num">07</span>Scheduled external feed</h2>
+    <p class="lede">Two halves of the same idea. The scheduled job polls with
+       ETag revalidation and writes a snapshot; the cards below are fetched live
+       in your browser right now, and fall back to that snapshot if the request
+       fails. Source is Wikipedia&rsquo;s public REST API, openly licensed and
+       deliberately unrelated to any client domain.</p>
+  <p class="meta" style="margin:0 0 10px">Status: <span id="feed-state">idle</span></p>
+  <div class="grid g3" id="news"></div>
+    <p class="meta" style="margin-top:14px">ETag / <code>If-None-Match</code>
+       revalidation means an unchanged poll costs one 304 and no parsing. The live
+       fetch degrades the same way the pipeline does: if it cannot reach the API it
+       serves the last good snapshot and says so in the status line, rather than
+       rendering an empty section and letting you assume there was no news.
+       Extracts from Wikipedia, CC BY-SA 4.0, linked to source.</p>
+</section>
+
+<section>
+  <h2><span class="num">08</span>Other systems I've built</h2>
   <p class="lede">Descriptions only — these are client systems, so no code,
      data, schema or identifiers are reproduced.</p>
   <div class="grid g2">
@@ -357,7 +427,7 @@ source degraded — exiting cleanly</pre>
 </section>
 
 <section>
-  <h2><span class="num">07</span>How this demo is sanitised</h2>
+  <h2><span class="num">09</span>How this demo is sanitised</h2>
   <div class="note">
     <strong>Nothing here derives from client work.</strong>
     <ul class="tight">
@@ -502,7 +572,281 @@ function renderLeague(){
     '<tr><td colspan="8" class="meta">no leases at this airport</td></tr>';
 }
 
-function renderAll(){ renderTrend(); renderShare(); renderPrice(); renderExpiry(); renderLeague(); }
+
+/* ---------------------------------------------------------------- slot plan
+   The holdings view, drawn as SVG rather than through the chart library.
+   Time of day is the resource axis; carriers stack within each window. There is
+   no honest Chart.js primitive for "blocks positioned on an axis and sized by
+   holding", and faking it with a bar chart would misreport the time spans. */
+const PLAN = { padL: 58, padR: 12, padT: 18, padB: 28, rowH: 26, gap: 6 };
+
+function esc(s){
+  return String(s == null ? '' : s).replace(/[&<>"]/g,
+    c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+}
+
+function carrierColour(code){
+  const i = D.carriers.findIndex(c => c.carrier_code === code);
+  return PAL[(i < 0 ? 0 : i) % PAL.length];
+}
+
+function renderSlotPlan(){
+  const host = el('slotplan');
+  const sel = el('sel-plan-market');
+  if (!host || !sel) return;
+  const mk = sel.value;
+  const rows = D.leases.filter(l => l.market_code === mk);
+
+  if (!rows.length){
+    host.innerHTML = '<p class="meta">No holdings recorded at this airport.</p>';
+    el('plan-legend').innerHTML = '';
+    el('plan-summary').textContent = '';
+    return;
+  }
+
+  const h0 = Math.min.apply(null, D.windows.map(w => w.hour_from));
+  const h1 = Math.max.apply(null, D.windows.map(w => w.hour_to));
+  const span = Math.max(h1 - h0, 1);
+  const W = Math.max(680, span * 46);
+  const H = PLAN.padT + D.windows.length * (PLAN.rowH + PLAN.gap) + PLAN.padB;
+  const x = h => PLAN.padL + ((h - h0) / span) * (W - PLAN.padL - PLAN.padR);
+
+  /* Capacity per window comes from what is actually held, so the unallocated
+     band is a real remainder rather than an invented ceiling. */
+  const held = {};
+  rows.forEach(l => { (held[l.window_id] = held[l.window_id] || []).push(l); });
+  const capacity = {};
+  D.windows.forEach(w => {
+    const inWin = held[w.window_id] || [];
+    const total = inWin.reduce((s, l) => s + l.slots_held, 0);
+    capacity[w.window_id] = Math.max(total, Math.ceil(total * 1.18));
+  });
+
+  const ticks = [];
+  for (let h = h0; h <= h1; h++){
+    if (span > 12 && h % 2) continue;
+    ticks.push('<line x1="' + x(h) + '" y1="' + (PLAN.padT - 6) + '" x2="' + x(h) +
+      '" y2="' + (H - PLAN.padB) + '" stroke="var(--line)" stroke-width="1"/>' +
+      '<text x="' + x(h) + '" y="' + (H - PLAN.padB + 16) + '" text-anchor="middle" ' +
+      'font-size="10" fill="var(--muted)">' + String(h).padStart(2, '0') + ':00</text>');
+  }
+
+  const bands = D.windows.map((w, i) => {
+    const y = PLAN.padT + i * (PLAN.rowH + PLAN.gap);
+    const x0 = x(w.hour_from);
+    const width = Math.max(x(w.hour_to) - x0, 2);
+    const inWin = (held[w.window_id] || []).slice().sort((a, b) => b.slots_held - a.slots_held);
+    const cap = capacity[w.window_id] || 1;
+
+    let cursor = x0;
+    const blocks = inWin.map(l => {
+      const bw = (l.slots_held / cap) * width;
+      const bx = cursor;
+      cursor += bw;
+      const tip = l.carrier_name + ' · ' + w.window_label + ' · ' +
+        l.slots_held + ' slot' + (l.slots_held === 1 ? '' : 's') +
+        ' · expires ' + l.expiry_year + ' · fee $' + l.fee_annual.toFixed(1) + 'm';
+      return '<g><rect x="' + bx + '" y="' + y + '" width="' + Math.max(bw - 1, 1) +
+        '" height="' + PLAN.rowH + '" fill="' + carrierColour(l.carrier_code) +
+        '" rx="2"><title>' + esc(tip) + '</title></rect>' +
+        (bw > 34 ? '<text x="' + (bx + 5) + '" y="' + (y + PLAN.rowH / 2 + 3.5) +
+          '" font-size="10" fill="#fff" style="pointer-events:none">' +
+          esc(l.carrier_code) + '</text>' : '') + '</g>';
+    }).join('');
+
+    const freeW = Math.max(x0 + width - cursor, 0);
+    const free = freeW > 1
+      ? '<rect x="' + cursor + '" y="' + y + '" width="' + freeW + '" height="' + PLAN.rowH +
+        '" rx="2" fill="url(#hatch)" stroke="var(--line)" stroke-width="1"><title>' +
+        esc('Unallocated capacity in ' + w.window_label) + '</title></rect>'
+      : '';
+
+    const peak = w.is_peak
+      ? '<rect x="' + x0 + '" y="' + (y - 2) + '" width="' + width + '" height="' +
+        (PLAN.rowH + 4) + '" fill="none" stroke="var(--pumpkin)" stroke-width="1" ' +
+        'stroke-dasharray="3 2" rx="3"/>'
+      : '';
+
+    return '<text x="' + (PLAN.padL - 8) + '" y="' + (y + PLAN.rowH / 2 + 3.5) +
+      '" text-anchor="end" font-size="10" fill="var(--muted)">' +
+      esc(w.window_label) + '</text>' + peak + blocks + free;
+  }).join('');
+
+  host.innerHTML = '<svg viewBox="0 0 ' + W + ' ' + H + '" width="' + W + '" height="' + H +
+    '" role="img" aria-label="Slot holdings by carrier and time window">' +
+    '<defs><pattern id="hatch" width="6" height="6" patternTransform="rotate(45)" ' +
+    'patternUnits="userSpaceOnUse"><line x1="0" y1="0" x2="0" y2="6" ' +
+    'stroke="var(--line)" stroke-width="3"/></pattern></defs>' +
+    ticks.join('') + bands + '</svg>';
+
+  const codes = [];
+  rows.forEach(r => { if (codes.indexOf(r.carrier_code) < 0) codes.push(r.carrier_code); });
+  el('plan-legend').innerHTML = codes.map(c => {
+    const nm = rows.find(r => r.carrier_code === c).carrier_name;
+    return '<span class="key"><i style="background:' + carrierColour(c) + '"></i>' +
+      esc(nm) + '</span>';
+  }).join('') +
+    '<span class="key"><i style="background:var(--line)"></i>unallocated</span>' +
+    '<span class="key"><i style="background:transparent;border:1px dashed var(--pumpkin)"></i>peak window</span>';
+
+  const totalSlots = rows.reduce((s, l) => s + l.slots_held, 0);
+  el('plan-summary').textContent = totalSlots + ' slots held by ' + codes.length +
+    ' carriers across ' + D.windows.length + ' windows';
+}
+
+/* -------------------------------------------------------- allocation register
+   Expandable rows. Detail is built on demand rather than rendered hidden, so 34
+   collapsed panels are not sitting in the DOM being read out by a screen
+   reader before anyone asked for them. */
+function allocDetail(a){
+  const b = D.benchmark.find(x => x.allocation_id === a.allocation_id);
+  const mk = D.markets.find(m => m.market_code === a.market_code) || {};
+  const leases = D.leases.filter(l => l.market_code === a.market_code);
+  const holders = [];
+  leases.forEach(l => { if (holders.indexOf(l.carrier_name) < 0) holders.push(l.carrier_name); });
+
+  const takeup = a.slots_offered ? a.slots_awarded / a.slots_offered : 0;
+  const over = a.reserve_total ? a.proceeds_total / a.reserve_total : null;
+  const stat = (k, v) => '<div class="stat"><div class="k">' + k + '</div><div class="v">' + v + '</div></div>';
+
+  return '<div class="detail">' +
+    '<div class="detail-grid">' +
+      stat('Slots offered', fmtN(a.slots_offered, 0)) +
+      stat('Slots awarded', fmtN(a.slots_awarded, 0)) +
+      stat('Take-up', fmtPc(takeup)) +
+      stat('Bidders', fmtN(a.n_bidders, 0)) +
+      stat('Reserve', '$' + fmtN(a.reserve_total, 1) + 'm') +
+      stat('Proceeds', '$' + fmtN(a.proceeds_total, 1) + 'm') +
+      stat('Over reserve', over == null ? '-' : over.toFixed(2) + '×') +
+      stat('Price / slot', '$' + fmtN(a.price_per_slot, 2) + 'm') +
+    '</div>' +
+    '<div class="detail-cols">' +
+      '<div><h4>How the unit price is derived</h4>' +
+      '<p class="meta">Proceeds of $' + fmtN(a.proceeds_total, 1) + 'm over ' +
+      fmtN(a.slots_awarded, 0) + ' awarded slots gives $' + fmtN(a.price_per_slot, 2) +
+      'm per slot. Normalised against ' + fmtN(mk.gdp_per_head, 0) +
+      ' GDP per head that is ' + (b ? fmtN(b.price_per_slot_per_gdp, 3) : '-') +
+      ' per unit of income, which is the only basis on which two airports in ' +
+      'different economies compare. Ranking on the headline total instead is ' +
+      'the usual way a benchmark ends up confidently wrong.</p></div>' +
+      '<div><h4>Context</h4><ul class="tight">' +
+      '<li>Airport: <strong>' + esc(mk.market_name || a.market_code) + '</strong> (' +
+      esc(mk.region || '-') + '), ' + fmtN(mk.passengers_yr, 1) + 'm passengers a year</li>' +
+      '<li>Mechanism: <strong>' + esc(a.mechanism) + '</strong>, status ' + esc(a.status) + '</li>' +
+      '<li>Held today by ' + holders.length + ' carrier' + (holders.length === 1 ? '' : 's') +
+      ': ' + esc(holders.slice(0, 4).join(', ')) + (holders.length > 4 ? ' and others' : '') + '</li>' +
+      '<li>Source reference: <code>' + esc(a.source_ref || 'n/a') + '</code></li>' +
+      '</ul></div>' +
+    '</div></div>';
+}
+
+function renderAllocTable(){
+  const tbl = el('tbl-alloc');
+  if (!tbl) return;
+  const tb = tbl.querySelector('tbody');
+  const rows = D.allocations.slice().sort((a, b) =>
+    b.allocation_year - a.allocation_year || a.market_code.localeCompare(b.market_code));
+
+  tb.innerHTML = rows.map((a, i) => {
+    const mk = D.markets.find(m => m.market_code === a.market_code);
+    return '<tr class="row-head" tabindex="0" role="button" aria-expanded="false" ' +
+      'aria-controls="d-' + i + '" data-i="' + i + '">' +
+      '<td class="chev" aria-hidden="true">&#9656;</td>' +
+      '<td><strong>' + esc(a.title) + '</strong></td>' +
+      '<td>' + esc(mk ? mk.market_name : a.market_code) + '</td>' +
+      '<td class="n">' + a.allocation_year + '</td>' +
+      '<td>' + esc(a.mechanism) + '</td>' +
+      '<td class="n">' + fmtN(a.slots_awarded, 0) + '</td>' +
+      '<td class="n">$' + fmtN(a.price_per_slot, 2) + 'm</td>' +
+      '<td class="n">$' + fmtN(a.proceeds_total, 1) + 'm</td></tr>' +
+      '<tr class="row-detail" id="d-' + i + '" hidden><td colspan="8"></td></tr>';
+  }).join('');
+
+  function toggleRow(head){
+    const i = +head.dataset.i;
+    const panel = el('d-' + i);
+    if (head.getAttribute('aria-expanded') === 'true'){
+      panel.hidden = true;
+      head.setAttribute('aria-expanded', 'false');
+      head.querySelector('.chev').innerHTML = '&#9656;';
+      return;
+    }
+    if (!panel.dataset.built){
+      panel.querySelector('td').innerHTML = allocDetail(rows[i]);
+      panel.dataset.built = '1';
+    }
+    panel.hidden = false;
+    head.setAttribute('aria-expanded', 'true');
+    head.querySelector('.chev').innerHTML = '&#9662;';
+  }
+
+  tb.querySelectorAll('.row-head').forEach(h => {
+    h.addEventListener('click', () => toggleRow(h));
+    h.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); toggleRow(h); }
+    });
+  });
+}
+
+/* --------------------------------------------------------------- live feed
+   Fetched in the browser from Wikipedia's REST API, which sends permissive
+   CORS headers and is openly licensed. The build-time news.json is the cached
+   fallback, so the section degrades to last-known-good instead of empty when
+   the network is unavailable - the same failure posture as the pipeline. */
+const FEED_TOPICS = ['Airport_slot', 'Slot_(air_traffic)', 'Air_traffic_control',
+  'Runway', 'Sustainable_aviation_fuel', 'Airline_hub'];
+
+function feedCard(title, extract, url, live){
+  return '<article class="card"><h3 style="margin:0 0 6px;font-size:15px">' +
+    esc(title) + '</h3><p class="meta" style="margin:0 0 10px">' +
+    esc((extract || '').slice(0, 180)) + (extract && extract.length > 180 ? '…' : '') +
+    '</p><p style="margin:0"><a href="' + esc(url) + '" rel="noopener nofollow">source</a> ' +
+    '<span class="meta">' + (live ? 'live' : 'cached') + '</span></p></article>';
+}
+
+async function loadLiveFeed(){
+  const host = el('news');
+  if (!host) return;
+  host.innerHTML = '<p class="meta">Fetching…</p>';
+
+  const topics = FEED_TOPICS.slice(0, 3);
+  try {
+    const results = await Promise.all(topics.map(async t => {
+      const r = await fetch('https://en.wikipedia.org/api/rest_v1/page/summary/' +
+        encodeURIComponent(t), { headers: { accept: 'application/json' } });
+      if (!r.ok) throw new Error(String(r.status));
+      return r.json();
+    }));
+    host.innerHTML = results.map(j => feedCard(
+      j.title, j.extract,
+      (j.content_urls && j.content_urls.desktop && j.content_urls.desktop.page) || '#',
+      true)).join('');
+    const note = el('feed-state');
+    if (note) note.textContent = 'live · fetched just now from the public API';
+  } catch (e) {
+    // Fall back to the snapshot the pipeline wrote, and say so plainly.
+    try {
+      const n = await (await fetch('news.json')).json();
+      host.innerHTML = (n.items || []).slice(0, 3).map(i =>
+        feedCard(i.title, i.summary, i.url, false)).join('');
+      const note = el('feed-state');
+      if (note) note.textContent = 'degraded · serving the cached snapshot';
+    } catch (e2) {
+      host.innerHTML = '<p class="meta">Feed unavailable and no cache present. ' +
+        'Run <code>etl/news_updater.py</code> to generate one.</p>';
+    }
+  }
+}
+
+function renderAll(){ renderTrend(); renderShare(); renderPrice(); renderExpiry(); renderLeague(); renderSlotPlan(); }
+
+function populateSlotPlan(){
+  const sel = el('sel-plan-market');
+  if (!sel) return;
+  sel.innerHTML = D.markets.map(m =>
+    '<option value="' + m.market_code + '">' + esc(m.market_name) + '</option>').join('');
+  sel.addEventListener('change', renderSlotPlan);
+}
 
 function populate(){
   el('sel-market').innerHTML = D.markets.map(m=>`<option value="${m.market_code}">${m.market_name} (${m.market_code})</option>`).join('');
@@ -510,6 +854,8 @@ function populate(){
   el('sel-metric').innerHTML = metrics.map(m=>`<option value="${m}">${m.replace(/_/g,' ')}</option>`).join('');
   el('sel-metric').value = metrics.includes('revenue_total') ? 'revenue_total' : metrics[0];
   syncCarriers();
+    populateSlotPlan();
+    renderAllocTable();
 }
 function syncCarriers(){
   const mk = el('sel-market').value;
@@ -537,13 +883,7 @@ fetch('demo_data.json').then(r=>r.json()).then(d=>{
   });
 }).catch(()=>{ el('c-panel').textContent='—'; });
 
-fetch('news.json').then(r=>r.json()).then(n=>{
-  el('news').innerHTML = n.items.map(i=>`
-    <div class="card"><h3 style="font-size:.92rem">${i.title}</h3>
-      <p class="meta">${i.topic} · ${i.source}</p>
-      <p style="font-size:13px;color:var(--muted)">${(i.summary||'').slice(0,190)}…</p>
-      <a href="${i.url}" target="_blank" rel="noopener">source →</a></div>`).join('');
-}).catch(()=>{ el('news').innerHTML='<p class="meta">news.json not generated yet — run <code>etl/news_updater.py</code>.</p>'; });
+loadLiveFeed();
 
 fetch('freshness.json').then(r=>r.json()).then(f=>{
   el('freshness').textContent = `pipeline last ran ${f.generated_at} · ${(f.panel_rows||0).toLocaleString()} panel rows · latest ${f.latest_period||'n/a'}`;
