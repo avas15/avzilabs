@@ -1,0 +1,133 @@
+---
+/**
+ * Site-wide digital rain background.
+ *
+ * Renders Rezmason's WebGL matrix (MIT, self-hosted under /matrix/) in an
+ * inert iframe behind the page.
+ *
+ * Three deliberate constraints, because a full-screen WebGL shader on every
+ * page is exactly the sort of thing that quietly ruins a site:
+ *
+ *  1. It loads after first paint, so it can never delay LCP. SEO is a stated
+ *     goal here and a background must not cost ranking.
+ *  2. It is skipped entirely under prefers-reduced-motion, and paused when the
+ *     tab is hidden.
+ *  3. It renders at a fraction of viewport resolution and is scaled up. Since
+ *     the whole thing is heavily blurred, the lost detail is invisible, and the
+ *     GPU does a fraction of the work.
+ */
+
+interface Props {
+  /** Rezmason preset. */
+  version?: string;
+  /** CSS blur radius. */
+  blur?: string;
+  /** Overall opacity of the layer. */
+  opacity?: number;
+  /** Internal render scale. 0.5 renders at half resolution, then scales up. */
+  renderScale?: number;
+}
+
+const {
+  version = 'twilight',
+  blur = '14px',
+  opacity = 0.42,
+  renderScale = 0.5,
+} = Astro.props;
+
+/*
+  Directory form, not /matrix/index.html. The site builds with
+  trailingSlash: 'never', so the explicit filename 308-redirects to this
+  anyway - the query string survives it, but it is a wasted round-trip on
+  every page load.
+*/
+const src = `/matrix/?version=${encodeURIComponent(version)}`;
+const pct = Math.round(100 / renderScale);
+---
+
+<div
+  data-matrix-bg
+  aria-hidden="true"
+  class="pointer-events-none fixed inset-0 -z-50 overflow-hidden bg-bg"
+  style={`--mx-blur:${blur}; --mx-opacity:${opacity}; --mx-size:${pct}%; --mx-scale:${renderScale};`}
+>
+  <iframe
+    data-matrix-frame
+    data-src={src}
+    title="Decorative background"
+    tabindex="-1"
+    loading="lazy"
+    aria-hidden="true"
+    scrolling="no"
+  ></iframe>
+  <!-- Darkening veil so body copy keeps its contrast over the rain. -->
+  <div class="absolute inset-0 bg-bg/55"></div>
+</div>
+
+<style>
+  [data-matrix-bg] iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    border: 0;
+    /* Render small, then scale up. The blur hides the resampling. */
+    width: var(--mx-size);
+    height: var(--mx-size);
+    transform: scale(var(--mx-scale));
+    transform-origin: top left;
+    filter: blur(var(--mx-blur)) saturate(1.15);
+    opacity: 0;
+    transition: opacity 1.2s ease-out;
+    pointer-events: none;
+  }
+
+  [data-matrix-bg] iframe.is-ready {
+    opacity: var(--mx-opacity);
+  }
+
+  /* The light theme is a paper terminal; rain would be illegible on it. */
+  :global([data-theme='light']) [data-matrix-bg] {
+    display: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    [data-matrix-bg] {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  const host = document.querySelector<HTMLElement>('[data-matrix-bg]');
+  const frame = document.querySelector<HTMLIFrameElement>('[data-matrix-frame]');
+
+  if (host && frame) {
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+    function start() {
+      if (reduced.matches || frame!.src) return;
+      // Assigned late and on purpose: setting src in the markup would put a
+      // WebGL context and its assets on the critical path.
+      frame!.src = frame!.dataset.src!;
+      frame!.addEventListener('load', () => frame!.classList.add('is-ready'), { once: true });
+    }
+
+    function stop() {
+      if (!frame!.src) return;
+      frame!.classList.remove('is-ready');
+      frame!.removeAttribute('src');
+    }
+
+    // Tear the whole thing down when the tab is hidden. A backgrounded WebGL
+    // canvas keeps a context alive and, on some machines, keeps the fans on.
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) stop();
+      else start();
+    });
+
+    reduced.addEventListener('change', (e) => (e.matches ? stop() : start()));
+
+    if (document.readyState === 'complete') requestAnimationFrame(start);
+    else window.addEventListener('load', () => requestAnimationFrame(start), { once: true });
+  }
+</script>

@@ -1,6 +1,4 @@
 ---
-import MatrixRain from '@/components/MatrixRain.astro';
-
 interface Props {
   stats: { label: string; value: string }[];
 }
@@ -17,12 +15,14 @@ const BOOT = [
 ---
 
 <section data-hero class="relative overflow-hidden pt-28 pb-20 sm:pt-36 sm:pb-28">
-  <div class="pointer-events-auto absolute inset-0 -z-10" data-hero-backdrop>
-    <MatrixRain opacity={0.55} />
-    <!-- Fade the rain into the page so body copy below stays readable. -->
+  {/*
+    The rain now lives site-wide in MatrixBackground. This is only the fade
+    that lifts the hero copy off it, so the headline keeps its contrast.
+  */}
+  <div class="pointer-events-none absolute inset-0 -z-10" data-hero-backdrop>
     <div
       aria-hidden="true"
-      class="absolute inset-0 bg-gradient-to-b from-transparent via-bg/70 to-bg"
+      class="absolute inset-0 bg-gradient-to-b from-bg/20 via-bg/60 to-bg"
     >
     </div>
   </div>
