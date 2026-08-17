@@ -78,6 +78,18 @@ const personSchema = {
 
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <meta name="theme-color" content="#000000" />
+
+    {/*
+      The teletext wordmark is above the fold on every page, so preload it.
+      Without this it swaps in late and the header visibly reflows.
+    */}
+    <link
+      rel="preload"
+      href="/fonts/bedstead-subset.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
     <link rel="alternate" type="application/rss+xml" title={SITE.name} href="/rss.xml" />
 
     <meta property="og:site_name" content={SITE.name} />

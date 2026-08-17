@@ -7,13 +7,6 @@ interface Props {
 
 const { stats } = Astro.props;
 
-const LOGO = String.raw`
- ▄▄▄· ▌ ▐·▄▄▄▄▄▪  ▄▄▌   ▄▄▄· ▄▄▄▄· .▄▄ ·
-▐█ ▀█ ▪█·█▌•██  ██ ██•  ▐█ ▀█ ▐█ ▀█▪ ▐█ ▀.
-▄█▀▀█ ▐█▐█• ▐█.▪▐█·██▪  ▄█▀▀█ ▐█▀▀█▄ ▄▀▀▀█▄
-▐█ ▪▐▌ ███ ▪▐█▌·▐█▌▐█▌▐▌▐█ ▪▐▌██▄▪▐█ ▐█▄▪▐█
- ▀  ▀ . ▀   ▀▀▀ ▀▀▀.▀▀▀  ▀  ▀ ·▀▀▀▀   ▀▀▀▀`;
-
 // Written as data so the boot sequence stays declarative and easy to retime.
 const BOOT = [
   { text: 'initialising avzilabs kernel', tag: 'OK' },
@@ -35,10 +28,21 @@ const BOOT = [
   </div>
 
   <div class="mx-auto max-w-7xl px-5 sm:px-8">
-    <pre
-      data-hero-logo
-      aria-label="AVZILABS"
-      class="ascii mb-8 text-[7px] leading-[1.15] text-brand sm:text-[11px] md:text-[13px]">{LOGO}</pre>
+    {/*
+      Teletext wordmark. The outer element carries the double-height scale so
+      the reveal animation can transform the inner one without the two fighting.
+      Reserved height below matches the scaled result and keeps CLS at zero.
+    */}
+    <div class="mb-9 h-[3.1rem] sm:h-[4.6rem] md:h-[5.8rem]">
+      <div class="teletext-double">
+        <h2
+          data-hero-logo
+          class="teletext glow text-[1.7rem] leading-none text-brand sm:text-[2.5rem] md:text-[3.2rem]"
+        >
+          AVZILABS
+        </h2>
+      </div>
+    </div>
 
     <ol data-boot class="mb-9 space-y-0.5 text-xs sm:text-[13px]" aria-label="Boot sequence">
       {

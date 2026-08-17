@@ -2,6 +2,20 @@
 @import '@fontsource-variable/jetbrains-mono';
 
 /*
+  Bedstead: an outline reproduction of the Mullard SAA5050 teletext character
+  generator, the chip behind BBC Micro MODE 7 and Ceefax. Public domain.
+  Subset to display characters only, so it costs about 4 KB.
+  Display use only - wordmarks and the banner, never body copy.
+*/
+@font-face {
+  font-family: 'Bedstead';
+  src: url('/fonts/bedstead-subset.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/*
   Terminal / phosphor CRT theme.
 
   Green on black at full saturation is punishing to read at length, so the
@@ -41,6 +55,7 @@
   --font-sans: 'JetBrains Mono Variable', ui-monospace, 'Cascadia Mono', 'SF Mono', Consolas,
     monospace;
   --font-mono: 'JetBrains Mono Variable', ui-monospace, Consolas, monospace;
+  --font-teletext: 'Bedstead', 'JetBrains Mono Variable', ui-monospace, monospace;
 
   --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
@@ -317,6 +332,43 @@
     white-space: pre;
     line-height: 1.05;
     letter-spacing: 0;
+  }
+
+  /* ---- Teletext ------------------------------------------------------ */
+  .teletext {
+    font-family: var(--font-teletext);
+    font-weight: 400;
+    letter-spacing: 0.02em;
+    /* Bedstead's glyphs already carry the SAA5050 blockiness; smoothing them
+       defeats the point. */
+    -webkit-font-smoothing: none;
+    font-smooth: never;
+  }
+
+  /*
+    Mode 7 double-height. On real teletext this is literally the same character
+    cell drawn over two rows, so a vertical scale is the authentic transform
+    rather than a cheat. Applied to a wrapper so the scale does not fight the
+    reveal animations on the element itself.
+  */
+  .teletext-double {
+    display: inline-block;
+    transform: scaleY(1.9);
+    transform-origin: top left;
+  }
+
+  /* Classic Ceefax palette, for accents. */
+  .tt-white {
+    color: #ffffff;
+  }
+  .tt-yellow {
+    color: #ffff00;
+  }
+  .tt-cyan {
+    color: #00ffff;
+  }
+  .tt-green {
+    color: #00ff00;
   }
 
   /* Dotted ASCII-ish rule */
