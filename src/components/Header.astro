@@ -49,6 +49,17 @@ const isActive = (href: string) => path === href || path.startsWith(href + '/');
     <div class="flex items-center gap-1">
       <button
         type="button"
+        data-sfx-toggle
+        aria-pressed="false"
+        class="border border-line px-2 py-1 text-[11px] uppercase tracking-wider text-ink-3 transition-colors duration-150 hover:border-brand hover:text-brand"
+        aria-label="Toggle interface sounds"
+        title="Interface sounds"
+      >
+        <span data-sfx-label>snd off</span>
+      </button>
+
+      <button
+        type="button"
         data-theme-toggle
         class="border border-line px-2 py-1 text-[11px] uppercase tracking-wider text-ink-3 transition-colors duration-150 hover:border-brand hover:text-brand"
         aria-label="Toggle colour theme"
@@ -88,8 +99,30 @@ const isActive = (href: string) => path === href || path.startsWith(href + '/');
 </header>
 
 <script>
+  import { initSfx, isEnabled, toggle } from '@/scripts/sfx';
+
   const root = document.documentElement;
   const label = document.querySelector('[data-theme-label]');
+
+  // Restores the saved preference only. Never switches sound on by itself.
+  initSfx();
+
+  const sfxBtn = document.querySelector('[data-sfx-toggle]');
+  const sfxLabel = document.querySelector('[data-sfx-label]');
+
+  function syncSfx() {
+    const on = isEnabled();
+    if (sfxLabel) sfxLabel.textContent = on ? 'snd on' : 'snd off';
+    sfxBtn?.setAttribute('aria-pressed', String(on));
+    sfxBtn?.classList.toggle('text-brand', on);
+    sfxBtn?.classList.toggle('border-brand', on);
+  }
+  syncSfx();
+
+  sfxBtn?.addEventListener('click', () => {
+    toggle();
+    syncSfx();
+  });
 
   function syncLabel() {
     if (label) label.textContent = root.getAttribute('data-theme') === 'light' ? 'light' : 'dark';

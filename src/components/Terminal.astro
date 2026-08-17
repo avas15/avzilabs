@@ -60,6 +60,8 @@ const data = JSON.stringify({ projects, posts });
     posts: { title: string; id: string }[];
   }
 
+  import { play } from '@/scripts/sfx';
+
   const DATA: TermData = (window as any).__AVZI ?? { projects: [], posts: [] };
 
   /*
@@ -213,12 +215,16 @@ const data = JSON.stringify({ projects, posts });
 
       const [name, ...args] = trimmed.split(/\s+/);
       const cmd = COMMANDS[name.toLowerCase()];
-      if (cmd) cmd.run(args);
-      else
+      if (cmd) {
+        play(name.toLowerCase() === 'matrix' ? 'glitch' : 'confirm');
+        cmd.run(args);
+      } else {
+        play('error');
         write(
           `command not found: ${esc(name)}. try <span class="text-[var(--brand)]">help</span>.`,
           'text-ink-3'
         );
+      }
       write('');
     }
 
@@ -235,6 +241,10 @@ const data = JSON.stringify({ projects, posts });
 
     // Up/down through history, like any shell.
     el.input.addEventListener('keydown', (e) => {
+      // Keystroke tick, but never on modifiers or navigation, which would
+      // rattle rather than read as typing.
+      if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) play('key');
+
       if (e.key === 'ArrowUp') {
         e.preventDefault();
         if (historyIndex > 0) el.input!.value = history[--historyIndex] ?? '';
