@@ -63,6 +63,6 @@ Actions minutes.
 | --- | --- |
 | Build command | `npm run build` |
 | Output directory | `dist` |
-| Node version | 20 |
+| Node version | 22 (Astro 7 requires >=22.12.0) |
 
 CI runs gitleaks on every push. This repository is public, so that gate is not optional.

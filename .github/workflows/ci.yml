@@ -32,9 +32,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Astro 7 requires >=22.12.0. Keep this in step with the Node version
+      # configured on Cloudflare Pages, or CI will pass and the deploy will not.
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
 
       - run: npm ci
