@@ -1,0 +1,99 @@
+---
+title: 'Data platform, end to end'
+summary: 'A working demonstration of how I build data products: messy ingestion, entity resolution, a provenance-tracked warehouse, quality gates, and an application on top. Runs in a second, rebuilds byte-identically.'
+description: 'A self-contained data platform demo covering idempotent ETL, fail-safe pipeline design, long-format panel modelling, entity resolution and data quality gates, with a live dashboard.'
+kind: 'data'
+year: 2026
+status: 'live'
+stack: ['Python', 'SQLite', 'ETL', 'Chart.js']
+order: 4
+links:
+  - label: 'Open the demo'
+    href: '/demos/slot-allocation/'
+    primary: true
+  - label: 'Source'
+    href: 'https://github.com/avas15/avzilabs/tree/main/demos/slot-allocation'
+---
+
+The systems I build at work cannot be published. This demonstrates the same engineering against
+a domain I invented, so the approach is visible without the data being.
+
+## The domain is a structural analogue, not a disguise
+
+It models **airport landing-slot allocation**. Allocation rounds behave like auctions, slot
+leases like licences, carriers like operators, airports like markets.
+
+That correspondence is deliberate, and so is the distance: slots genuinely differ in entities,
+units and economics, so this is not the real thing with the names swapped. Every figure comes
+from a seeded generator, every table and column name is original to the demo, and no schema,
+identifier or naming convention from any production system appears.
+
+## The panel key is the whole design
+
+The centre of it is a long-format panel keyed by
+`(entity, market, metric, period, period_type, source, quality_flag, vintage)`.
+
+That key does three things that are painful to retrofit:
+
+- A new data vintage **appends rather than overwrites**, so history survives.
+- Two sources reporting the same metric **coexist instead of colliding**, so you can show the
+  disagreement rather than silently picking a winner.
+- Annual and quarterly figures cannot overwrite each other.
+
+Getting this wrong is the most common serious data modelling mistake I see. It destroys history
+quietly, and nobody notices for months because every individual query still returns a number.
+
+The dashboard makes the point visually: where two sources overlap, they are plotted as
+**separate lines rather than blended**, and headline figures are labelled by origin. A single
+averaged line would look tidier and would be a lie about what is known.
+
+## Pipeline properties
+
+Six, each exercised by the code rather than asserted in a README:
+
+| Property | How |
+| --- | --- |
+| Run lock | Single-run guarantee, with stale locks reclaimed after a TTL so a killed process cannot wedge it |
+| Fail safe | Unreachable source marks the step degraded, exits cleanly, leaves last-good data untouched |
+| Idempotent | Upsert on a natural key including source and vintage; re-running changes nothing |
+| Change detection | Cheap manifest and fingerprint diff first, expensive fetch only for records that moved |
+| Stage then swap | Derived tables built in staging and promoted in one transaction, so readers never see a partial state |
+| Provenance | Every step appends to a run manifest with rows in and out, so any figure traces back to a run |
+
+The failure path is the one worth trying:
+
+```bash
+python etl/pipeline_demo.py --simulate-outage
+```
+
+A pipeline that fails loudly and leaves yesterday's good data in place is worth considerably
+more than one that quietly publishes a partial today. The second kind is how a dashboard ends
+up confidently wrong.
+
+## Verification
+
+Claims in a portfolio should be checkable, so these are the ones I check:
+
+- **Reproducible.** Two clean rebuilds produce a byte-identical database.
+- **Idempotent.** Running the pipeline twice leaves the data unchanged, while the run manifest
+  correctly grows, because provenance is supposed to accumulate.
+- **Fail-safe.** A simulated outage exits zero with the data fingerprint unchanged.
+- **Quality gated.** Six assertions run every execution and the pipeline exits non-zero if any
+  fail: orphaned leases, expiry before start, negative counts, awarded exceeding offered,
+  percentages outside range, and a non-empty panel.
+
+Worth noting how easy it is to test this badly. Comparing the database file byte-for-byte
+across two runs reports "not idempotent", because the run manifest appends a row each time by
+design. The correct test compares the data tables and excludes the append-only provenance
+table. The first version of that check told me something was broken when nothing was.
+
+## Deliberately unglamorous choices
+
+SQLite rather than a warehouse, so the demo runs anywhere in under a second. No front-end
+framework, because the interesting work is upstream of the page. A seeded generator rather than
+a committed dump, so the data is reproducible and reviewable instead of opaque.
+
+The external feed polls Wikipedia's public API, chosen because it is openly licensed and
+completely unrelated to any client domain. It demonstrates ETag revalidation, content hashing
+to distinguish "fetched again" from "actually changed", and cache-backed degradation when
+offline.

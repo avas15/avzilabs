@@ -43,3 +43,7 @@ private/
 # wrangler local build artifacts
 .wrangler/
 workers/**/.wrangler/
+
+# slot-allocation demo: generated, rebuilt by build_demo_db.py / news_updater.py
+demos/slot-allocation/data/demo.sqlite
+demos/slot-allocation/etl/cache/

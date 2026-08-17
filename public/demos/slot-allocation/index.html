@@ -1,0 +1,553 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Data Platform Portfolio — slot allocation demo</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<style>
+:root{
+  --pumpkin:#FA8334; --pumpkin-d:#E5732B;
+  --prussian:#031D44; --prussian-l:#1B4A75;
+  --deep:#04395E; --deep-l:#3A8AB8;
+  --berry:#9E4770; --emerald:#10b981;
+  --bg:#FFF8F2; --surface:#ffffff; --line:#EADFD5;
+  --text:#1c2531; --muted:#6b7280; --code:#F4EDE6;
+}
+[data-theme=dark]{
+  --bg:#050D1A; --surface:#0B1728; --line:#17293F;
+  --text:#E6EDF5; --muted:#93A4B8; --code:#0F1F33;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme=light]){
+    --bg:#050D1A; --surface:#0B1728; --line:#17293F;
+    --text:#E6EDF5; --muted:#93A4B8; --code:#0F1F33;
+  }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);
+  font:15px/1.6 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+a{color:var(--pumpkin-d);text-decoration:none}
+a:hover{text-decoration:underline}
+.wrap{max-width:1180px;margin:0 auto;padding:0 20px}
+header{background:linear-gradient(135deg,var(--prussian),var(--deep));color:#fff;
+  padding:54px 0 44px;border-bottom:4px solid var(--pumpkin)}
+header h1{margin:0 0 8px;font-size:2rem;letter-spacing:-.02em}
+header p{margin:0;color:#C8DCEB;max-width:62ch}
+.badges{margin-top:18px;display:flex;flex-wrap:wrap;gap:7px}
+.badge{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);
+  color:#fff;padding:3px 10px;border-radius:999px;font-size:11px}
+.toggle{position:absolute;top:18px;right:20px;background:rgba(255,255,255,.15);
+  border:1px solid rgba(255,255,255,.25);color:#fff;border-radius:8px;
+  padding:6px 11px;font-size:12px;cursor:pointer}
+section{padding:44px 0;border-bottom:1px solid var(--line)}
+h2{font-size:1.35rem;margin:0 0 6px;letter-spacing:-.01em}
+h2 .num{color:var(--pumpkin);font-weight:700;margin-right:8px}
+.lede{color:var(--muted);margin:0 0 22px;max-width:75ch}
+.grid{display:grid;gap:16px}
+.g2{grid-template-columns:repeat(auto-fit,minmax(330px,1fr))}
+.g3{grid-template-columns:repeat(auto-fit,minmax(250px,1fr))}
+.g4{grid-template-columns:repeat(auto-fit,minmax(180px,1fr))}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px}
+.card h3{margin:0 0 4px;font-size:1rem}
+.card .meta{color:var(--muted);font-size:12px;margin:0 0 10px}
+.kpi{font-size:1.6rem;font-weight:700;color:var(--prussian-l);line-height:1.1}
+[data-theme=dark] .kpi{color:var(--deep-l)}
+.kpi-l{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.chart{position:relative;height:250px}
+.chart-sm{position:relative;height:210px}
+select,button.ctl{background:var(--surface);color:var(--text);
+  border:1px solid var(--line);border-radius:8px;padding:5px 9px;font-size:12px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:left;padding:7px 9px;border-bottom:1px solid var(--line)}
+th{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
+code,pre{background:var(--code);border-radius:6px;font-size:12.5px;
+  font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace}
+code{padding:1px 5px}
+pre{padding:14px;overflow-x:auto;border:1px solid var(--line);line-height:1.5}
+.tag{display:inline-block;background:var(--code);border:1px solid var(--line);
+  color:var(--muted);border-radius:5px;padding:1px 7px;font-size:11px;margin:2px 3px 2px 0}
+.note{border-left:3px solid var(--pumpkin);background:var(--code);
+  padding:12px 15px;border-radius:0 8px 8px 0;font-size:13.5px}
+.scroll{overflow-x:auto}
+footer{padding:30px 0;color:var(--muted);font-size:12.5px}
+ul.tight{margin:8px 0 0;padding-left:20px}
+ul.tight li{margin:3px 0}
+.pill{font-size:10px;padding:1px 7px;border-radius:999px;
+  background:rgba(250,131,52,.14);color:var(--pumpkin-d);border:1px solid rgba(250,131,52,.3)}
+</style>
+</head>
+<body>
+
+<header style="position:relative">
+  <button class="toggle" onclick="toggleTheme()">◐ theme</button>
+  <div class="wrap">
+    <h1>Data platform engineering — worked demo</h1>
+    <p>An end-to-end data product built the way I build them in production:
+       ingestion from messy sources, entity resolution, a provenance-tracked
+       warehouse layer, quality gates, and an application on top. The domain
+       below is <strong>synthetic airport slot allocation</strong> — a
+       structural stand-in for the regulated-asset platform I run day to day.</p>
+    <div class="badges">
+      <span class="badge">Python</span><span class="badge">SQLite</span>
+      <span class="badge">FastAPI</span><span class="badge">ETL / ELT</span>
+      <span class="badge">Entity resolution</span><span class="badge">Data quality</span>
+      <span class="badge">Chart.js</span><span class="badge">AWS EC2</span>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+<section>
+  <h2><span class="num">01</span>What this demonstrates</h2>
+  <p class="lede">Four things that are hard to show on a CV, shown here instead.</p>
+  <div class="grid g4">
+    <div class="card"><div class="kpi" id="c-panel">–</div>
+      <div class="kpi-l">panel observations</div>
+      <p class="meta" style="margin-top:8px">Long-format, one row per entity ×
+         market × period × metric × source.</p></div>
+    <div class="card"><div class="kpi" id="c-alloc">–</div>
+      <div class="kpi-l">allocation rounds</div>
+      <p class="meta" style="margin-top:8px">Auction outcomes with per-window
+         pricing and mechanism metadata.</p></div>
+    <div class="card"><div class="kpi" id="c-lease">–</div>
+      <div class="kpi-l">leases tracked</div>
+      <p class="meta" style="margin-top:8px">Holdings with terms and expiry,
+         joined back to the round that created them.</p></div>
+    <div class="card"><div class="kpi" id="c-src">–</div>
+      <div class="kpi-l">sources reconciled</div>
+      <p class="meta" style="margin-top:8px">Overlapping sources kept separate,
+         never blended.</p></div>
+  </div>
+</section>
+
+<section>
+  <h2><span class="num">02</span>Live demo — market dashboard</h2>
+  <p class="lede">Reads a generated JSON extract; no backend. Two independent
+     sources report some of the same metrics and are plotted side by side —
+     a deliberate design choice explained in ADR-002.</p>
+
+  <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px">
+    <select id="sel-market"></select>
+    <select id="sel-carrier"></select>
+    <select id="sel-metric"></select>
+    <select id="sel-range">
+      <option value="12">Last 3 yrs</option>
+      <option value="20" selected>Last 5 yrs</option>
+      <option value="40">All</option>
+    </select>
+  </div>
+
+  <div class="grid g2">
+    <div class="card"><h3>Metric trend</h3>
+      <p class="meta" id="trend-src">–</p>
+      <div class="chart"><canvas id="ch-trend"></canvas></div></div>
+    <div class="card"><h3>Slot share by carrier</h3>
+      <p class="meta">Share of leased slots at the selected airport</p>
+      <div class="chart"><canvas id="ch-share"></canvas></div></div>
+    <div class="card"><h3>Clearing price per slot</h3>
+      <p class="meta">Completed rounds, by year</p>
+      <div class="chart-sm"><canvas id="ch-price"></canvas></div></div>
+    <div class="card"><h3>Lease expiry profile</h3>
+      <p class="meta">Slots coming up for renewal</p>
+      <div class="chart-sm"><canvas id="ch-expiry"></canvas></div></div>
+  </div>
+
+  <div class="card" style="margin-top:16px">
+    <h3>Carrier league table <span class="pill" id="lt-period"></span></h3>
+    <div class="scroll"><table id="tbl-league">
+      <thead><tr><th>Carrier</th><th>Group</th><th class="n">Slots</th>
+      <th class="n">Share</th><th class="n">Revenue</th><th class="n">EBITDA margin</th>
+      <th class="n">Load factor</th><th class="n">Annual fee</th></tr></thead>
+      <tbody></tbody></table></div>
+  </div>
+</section>
+
+<section>
+  <h2><span class="num">03</span>Pipeline architecture</h2>
+  <p class="lede">The demo pipeline in <code>etl/pipeline_demo.py</code> is a
+     reduced version of one I operate daily. Every property below is deliberate
+     and exercised by the code.</p>
+
+  <div class="card" style="margin-bottom:16px">
+  <svg viewBox="0 0 980 216" width="100%" role="img" aria-label="Pipeline architecture diagram">
+    <defs><marker id="a" markerWidth="9" markerHeight="9" refX="8" refY="3"
+      orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#9aa6b5"/></marker></defs>
+    <g font-size="11.5" font-family="ui-sans-serif,system-ui" text-anchor="middle">
+      <g>
+        <rect x="8" y="58" width="126" height="58" rx="9" fill="#FA8334" opacity=".14"
+              stroke="#FA8334"/>
+        <text x="71" y="82" fill="currentColor" font-weight="600">Sources</text>
+        <text x="71" y="99" fill="#8b95a3" font-size="10">API · files · feeds</text>
+      </g>
+      <line x1="136" y1="87" x2="176" y2="87" stroke="#9aa6b5" marker-end="url(#a)"/>
+      <g>
+        <rect x="178" y="46" width="132" height="82" rx="9" fill="#04395E" opacity=".12"
+              stroke="#04395E"/>
+        <text x="244" y="70" fill="currentColor" font-weight="600">Change detect</text>
+        <text x="244" y="88" fill="#8b95a3" font-size="10">manifest diff</text>
+        <text x="244" y="103" fill="#8b95a3" font-size="10">fingerprint</text>
+        <text x="244" y="118" fill="#8b95a3" font-size="10">fetch only deltas</text>
+      </g>
+      <line x1="312" y1="87" x2="352" y2="87" stroke="#9aa6b5" marker-end="url(#a)"/>
+      <g>
+        <rect x="354" y="46" width="132" height="82" rx="9" fill="#1B4A75" opacity=".13"
+              stroke="#1B4A75"/>
+        <text x="420" y="70" fill="currentColor" font-weight="600">Resolve</text>
+        <text x="420" y="88" fill="#8b95a3" font-size="10">alias matching</text>
+        <text x="420" y="103" fill="#8b95a3" font-size="10">tiered confidence</text>
+        <text x="420" y="118" fill="#8b95a3" font-size="10">N:1 guard</text>
+      </g>
+      <line x1="488" y1="87" x2="528" y2="87" stroke="#9aa6b5" marker-end="url(#a)"/>
+      <g>
+        <rect x="530" y="46" width="132" height="82" rx="9" fill="#3A8AB8" opacity=".14"
+              stroke="#3A8AB8"/>
+        <text x="596" y="70" fill="currentColor" font-weight="600">Stage → swap</text>
+        <text x="596" y="88" fill="#8b95a3" font-size="10">derive in staging</text>
+        <text x="596" y="103" fill="#8b95a3" font-size="10">atomic promote</text>
+        <text x="596" y="118" fill="#8b95a3" font-size="10">readers never split</text>
+      </g>
+      <line x1="664" y1="87" x2="704" y2="87" stroke="#9aa6b5" marker-end="url(#a)"/>
+      <g>
+        <rect x="706" y="46" width="126" height="82" rx="9" fill="#10b981" opacity=".13"
+              stroke="#10b981"/>
+        <text x="769" y="70" fill="currentColor" font-weight="600">Quality gate</text>
+        <text x="769" y="88" fill="#8b95a3" font-size="10">6 assertions</text>
+        <text x="769" y="103" fill="#8b95a3" font-size="10">fail = degraded</text>
+        <text x="769" y="118" fill="#8b95a3" font-size="10">non-zero exit</text>
+      </g>
+      <line x1="834" y1="87" x2="874" y2="87" stroke="#9aa6b5" marker-end="url(#a)"/>
+      <g>
+        <rect x="876" y="58" width="96" height="58" rx="9" fill="#9E4770" opacity=".13"
+              stroke="#9E4770"/>
+        <text x="924" y="82" fill="currentColor" font-weight="600">Product</text>
+        <text x="924" y="99" fill="#8b95a3" font-size="10">+ freshness</text>
+      </g>
+      <rect x="178" y="152" width="654" height="42" rx="9" fill="#031D44" opacity=".07"
+            stroke="#9aa6b5" stroke-dasharray="4 3"/>
+      <text x="505" y="171" fill="currentColor" font-size="11" font-weight="600">
+        run lock · idempotent upserts · provenance manifest · fail-safe exit</text>
+      <text x="505" y="187" fill="#8b95a3" font-size="10">
+        every step writes rows-in / rows-out so any figure traces back to a run</text>
+    </g>
+  </svg>
+  </div>
+
+  <div class="grid g2">
+    <div class="card">
+      <h3>Run it yourself</h3>
+      <pre>python data/build_demo_db.py
+python etl/pipeline_demo.py --dry-run
+python etl/pipeline_demo.py
+python etl/pipeline_demo.py --simulate-outage
+python etl/news_updater.py</pre>
+      <p class="meta" style="margin-top:10px">Seeded and deterministic — the same
+         inputs produce byte-identical output.</p>
+    </div>
+    <div class="card">
+      <h3>Fail-safe behaviour</h3>
+      <p class="meta">The property I care most about. With
+         <code>--simulate-outage</code>:</p>
+      <pre>[DEGR] change_detect  upstream unreachable;
+                      last-good data retained
+source degraded — exiting cleanly</pre>
+      <p class="meta" style="margin-top:10px">It does not half-write, does not
+         truncate, and does not report success. A pipeline that fails loudly and
+         leaves yesterday's good data intact beats one that silently publishes
+         a partial today.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2><span class="num">04</span>Entity resolution</h2>
+  <p class="lede">Reconciling third-party names to an internal master is the
+     unglamorous work that decides whether every downstream number is right.
+     The demo warehouse ships deliberately messy aliases.</p>
+  <div class="grid g2">
+    <div class="card">
+      <h3>Tiered matching</h3>
+      <table>
+        <thead><tr><th>Tier</th><th>Rule</th><th>Action</th></tr></thead>
+        <tbody>
+          <tr><td>1 exact</td><td>canonical / legal / known alias, same market</td><td>auto-link</td></tr>
+          <tr><td>2 fuzzy</td><td>normalised score ≥ threshold, same market</td><td>link + log for review</td></tr>
+          <tr><td>3 unmatched</td><td>no confident match</td><td>kept unlinked, never guessed</td></tr>
+        </tbody>
+      </table>
+      <p class="meta" style="margin-top:10px">Normalisation strips legal suffixes
+         and market qualifiers — but never to an empty string, because for some
+         carriers the industry word <em>is</em> the brand.</p>
+    </div>
+    <div class="card">
+      <h3>The guard that matters</h3>
+      <p class="meta">If two source entities both match one internal entity in
+         the same market, linking both silently merges two companies' histories
+         into a single series. The result looks plausible and is wrong.</p>
+      <pre>collision: ARL / "Aurora Air"
+  keep    Aurora Air      (1.00)
+  demote  Aurora Airways  (0.86)  → unlinked</pre>
+      <p class="meta" style="margin-top:10px">Genuine mergers are handled by an
+         explicit successor rule, never by name similarity.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2><span class="num">05</span>Scheduled external feed</h2>
+  <p class="lede">A polling job with cache revalidation and graceful degradation.
+     Pulls from Wikipedia's public REST API — openly licensed and deliberately
+     unrelated to any client domain.</p>
+  <div class="grid g3" id="news"></div>
+  <p class="meta" style="margin-top:14px">ETag / <code>If-None-Match</code>
+     revalidation means an unchanged poll costs one 304 and no parsing. Offline,
+     it serves the cache and marks the run degraded rather than failing.
+     Content from Wikipedia, CC BY-SA 4.0.</p>
+</section>
+
+<section>
+  <h2><span class="num">06</span>Other systems I've built</h2>
+  <p class="lede">Descriptions only — these are client systems, so no code,
+     data, schema or identifiers are reproduced.</p>
+  <div class="grid g2">
+    <div class="card"><h3>Regulated-asset intelligence platform</h3>
+      <p class="meta">FastAPI · SQLite · Jinja2 · Gunicorn · Apache · EC2</p>
+      <p>Subscription web platform serving structured market data to enterprise
+         users. ~34k LOC Python, 40+ routes, two databases with a one-way
+         additive sync, 15 SQL views.</p>
+      <div><span class="tag">full ownership</span><span class="tag">multi-tenant auth</span>
+           <span class="tag">Excel export</span></div></div>
+    <div class="card"><h3>Daily ingestion pipeline</h3>
+      <p class="meta">Python · cron · run-locked · idempotent</p>
+      <p>Change-detecting daily refresh across a commercial API and 19 public
+         regulator sources, with per-source caching, selective detail fetch,
+         downstream sync, freshness snapshots and provenance manifests.</p>
+      <div><span class="tag">fail-safe</span><span class="tag">resumable</span>
+           <span class="tag">provenance</span></div></div>
+    <div class="card"><h3>Multi-source warehouse layer</h3>
+      <p class="meta">Long-format panel · provenance-tracked</p>
+      <p>Consolidated seven commercial and public sources into ~470k
+         observations spanning 300+ entities and 100+ markets, including
+         forecast series extracted from 51 unstructured PDF reports.</p>
+      <div><span class="tag">entity resolution</span><span class="tag">PDF extraction</span>
+           <span class="tag">schema migration</span></div></div>
+    <div class="card"><h3>Natural-language analytics assistant</h3>
+      <p class="meta">LLM · RAG · FTS5 · evaluation harness</p>
+      <p>NL→SQL over a 20-table schema with retrieval across a full-text
+         corpus, a curated exemplar library, and a regression harness of 87
+         cases with automated scoring and an error-pattern taxonomy.</p>
+      <div><span class="tag">eval-driven</span><span class="tag">retrieval</span>
+           <span class="tag">guardrails</span></div></div>
+    <div class="card"><h3>Auction simulation platforms</h3>
+      <p class="meta">PHP/MySQL, later Python/FastAPI</p>
+      <p>Simulators across five national markets implementing ascending-clock,
+         sealed-bid, hybrid and combinatorial formats — activity rules,
+         eligibility points, bid increments, winner determination.</p>
+      <div><span class="tag">mechanism design</span><span class="tag">real-time rounds</span>
+           <span class="tag">admin tooling</span></div></div>
+    <div class="card"><h3>Package optimiser</h3>
+      <p class="meta">Combinatorial allocation</p>
+      <p>Winner-determination and assignment-stage optimiser producing
+         per-participant distributions across candidate packages, with
+         audit output for every round.</p>
+      <div><span class="tag">optimisation</span><span class="tag">auditability</span></div></div>
+  </div>
+</section>
+
+<section>
+  <h2><span class="num">07</span>How this demo is sanitised</h2>
+  <div class="note">
+    <strong>Nothing here derives from client work.</strong>
+    <ul class="tight">
+      <li>The domain is airport slot allocation — chosen as a
+          <em>structural</em> analogue, not a disguise for the real one.</li>
+      <li>All data is generated by <code>build_demo_db.py</code> from a seeded
+          RNG. No real figures, entities or geographies.</li>
+      <li>Table and column names are original to this demo. No production
+          schema, identifier or naming convention is reproduced.</li>
+      <li>Carriers, airports and groups are invented and do not correspond to
+          real organisations.</li>
+      <li>Client systems in §06 are described at the level of engineering
+          approach only — no code, data or schema.</li>
+      <li>The external feed is Wikipedia's public API under CC BY-SA.</li>
+    </ul>
+  </div>
+</section>
+
+<footer class="wrap">
+  Built as a portfolio demo. Data synthetic and reproducible via a seeded
+  generator · <span id="freshness"></span>
+</footer>
+</div>
+
+<script>
+const PAL = ['#FA8334','#04395E','#1B4A75','#9E4770','#10b981','#7BADC9','#C45F20','#3A8AB8'];
+let D = null, charts = {};
+
+function isDark(){ return document.documentElement.dataset.theme === 'dark'; }
+function grid(){ return isDark() ? 'rgba(255,255,255,.08)' : 'rgba(0,0,0,.06)'; }
+function tickc(){ return isDark() ? '#93A4B8' : '#6b7280'; }
+function toggleTheme(){
+  const r = document.documentElement;
+  r.dataset.theme = r.dataset.theme === 'dark' ? 'light' : 'dark';
+  localStorage.setItem('t', r.dataset.theme);
+  if (D) renderAll();
+}
+if (localStorage.getItem('t')) document.documentElement.dataset.theme = localStorage.getItem('t');
+
+const el = id => document.getElementById(id);
+const fmtN = (v,d=1) => v==null||isNaN(v) ? '–' : Number(v).toLocaleString(undefined,{minimumFractionDigits:d,maximumFractionDigits:d});
+const fmtPc = v => v==null ? '–' : (v*100).toFixed(1)+'%';
+
+function chart(key, canvasId, cfg){
+  if (charts[key]) charts[key].destroy();
+  const c = el(canvasId); if (!c || !window.Chart) return;
+  charts[key] = new Chart(c.getContext('2d'), cfg);
+}
+function baseOpts(extra){
+  return Object.assign({
+    responsive:true, maintainAspectRatio:false,
+    interaction:{mode:'index',intersect:false},
+    plugins:{legend:{labels:{color:tickc(),boxWidth:10,font:{size:10}}}},
+    scales:{x:{grid:{color:grid()},ticks:{color:tickc(),font:{size:9},maxRotation:0,autoSkip:true}},
+            y:{grid:{color:grid()},ticks:{color:tickc(),font:{size:9}}}}
+  }, extra||{});
+}
+
+function panelKeys(carrier, market, metric){
+  return Object.keys(D.panel).filter(k=>{
+    const [c,m,me] = k.split('|');
+    return c===carrier && m===market && me===metric;
+  });
+}
+
+function renderTrend(){
+  const mk = el('sel-market').value, ca = el('sel-carrier').value,
+        me = el('sel-metric').value, lim = +el('sel-range').value;
+  const keys = panelKeys(ca, mk, me);
+  if (!keys.length){ el('trend-src').textContent = 'no series for this combination'; chart('trend','ch-trend',{type:'line',data:{labels:[],datasets:[]},options:baseOpts()}); return; }
+  let labels = [];
+  keys.forEach(k => D.panel[k].forEach(([p]) => { if(!labels.includes(p)) labels.push(p); }));
+  labels.sort((a,b)=>{const A=a.match(/(\d)Q(\d\d)/),B=b.match(/(\d)Q(\d\d)/);return (+A[2]*10+ +A[1])-(+B[2]*10+ +B[1]);});
+  labels = labels.slice(-lim);
+  const ds = keys.map((k,i)=>{
+    const src = k.split('|')[3], map = Object.fromEntries(D.panel[k]);
+    return {label:src, data:labels.map(l=>map[l]??null), borderColor:PAL[i%PAL.length],
+            backgroundColor:PAL[i%PAL.length]+'33', borderWidth:2, pointRadius:0,
+            pointHoverRadius:4, tension:.3, spanGaps:true};
+  });
+  el('trend-src').textContent = keys.length>1
+    ? keys.length+' sources plotted separately — no blending' : 'source: '+keys[0].split('|')[3];
+  chart('trend','ch-trend',{type:'line',data:{labels,datasets:ds},options:baseOpts()});
+}
+
+function renderShare(){
+  const mk = el('sel-market').value;
+  const agg = {};
+  D.leases.filter(l=>l.market_code===mk).forEach(l=>{ agg[l.carrier_name]=(agg[l.carrier_name]||0)+l.slots_held; });
+  const names = Object.keys(agg).sort((a,b)=>agg[b]-agg[a]);
+  chart('share','ch-share',{type:'doughnut',
+    data:{labels:names,datasets:[{data:names.map(n=>agg[n]),
+      backgroundColor:names.map((_,i)=>PAL[i%PAL.length]),borderWidth:0}]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:'58%',
+      plugins:{legend:{position:'right',labels:{color:tickc(),boxWidth:10,font:{size:10}}}}}});
+}
+
+function renderPrice(){
+  const mk = el('sel-market').value;
+  const rows = D.benchmark.filter(b=>b.market_code===mk).sort((a,b)=>a.allocation_year-b.allocation_year);
+  chart('price','ch-price',{type:'bar',
+    data:{labels:rows.map(r=>r.allocation_year),
+      datasets:[{label:'Price per slot',data:rows.map(r=>r.price_per_slot),
+        backgroundColor:'#FA8334'}]},
+    options:baseOpts({plugins:{legend:{display:false}}})});
+}
+
+function renderExpiry(){
+  const mk = el('sel-market').value, agg = {};
+  D.leases.filter(l=>l.market_code===mk).forEach(l=>{ agg[l.expiry_year]=(agg[l.expiry_year]||0)+l.slots_held; });
+  const yrs = Object.keys(agg).sort();
+  chart('expiry','ch-expiry',{type:'bar',
+    data:{labels:yrs,datasets:[{label:'Slots expiring',data:yrs.map(y=>agg[y]),
+      backgroundColor:yrs.map(y=>+y<=2027?'#9E4770':'#04395E')}]},
+    options:baseOpts({plugins:{legend:{display:false}}})});
+}
+
+function latestVal(carrier, market, metric){
+  const keys = panelKeys(carrier, market, metric);
+  if(!keys.length) return null;
+  const s = D.panel[keys[0]];
+  return s && s.length ? s[s.length-1][1] : null;
+}
+
+function renderLeague(){
+  const mk = el('sel-market').value;
+  const agg = {};
+  D.leases.filter(l=>l.market_code===mk).forEach(l=>{
+    (agg[l.carrier_code] ||= {name:l.carrier_name,group:l.parent_group,slots:0,fee:0});
+    agg[l.carrier_code].slots += l.slots_held; agg[l.carrier_code].fee += l.fee_annual;
+  });
+  const total = Object.values(agg).reduce((s,a)=>s+a.slots,0) || 1;
+  const rows = Object.entries(agg).sort((a,b)=>b[1].slots-a[1].slots).map(([code,a])=>`
+    <tr><td><strong>${a.name}</strong> <span class="meta">${code}</span></td>
+      <td>${a.group}</td><td class="n">${a.slots}</td>
+      <td class="n">${fmtPc(a.slots/total)}</td>
+      <td class="n">${(v=>v==null?'–':'$'+fmtN(v,0)+'m')(latestVal(code,mk,'revenue_total'))}</td>
+      <td class="n">${fmtPc(latestVal(code,mk,'ebitda_margin'))}</td>
+      <td class="n">${fmtPc(latestVal(code,mk,'load_factor'))}</td>
+      <td class="n">$${fmtN(a.fee,1)}m</td></tr>`).join('');
+  el('tbl-league').querySelector('tbody').innerHTML = rows ||
+    '<tr><td colspan="8" class="meta">no leases at this airport</td></tr>';
+}
+
+function renderAll(){ renderTrend(); renderShare(); renderPrice(); renderExpiry(); renderLeague(); }
+
+function populate(){
+  el('sel-market').innerHTML = D.markets.map(m=>`<option value="${m.market_code}">${m.market_name} (${m.market_code})</option>`).join('');
+  const metrics = [...new Set(Object.keys(D.panel).map(k=>k.split('|')[2]))].sort();
+  el('sel-metric').innerHTML = metrics.map(m=>`<option value="${m}">${m.replace(/_/g,' ')}</option>`).join('');
+  el('sel-metric').value = metrics.includes('revenue_total') ? 'revenue_total' : metrics[0];
+  syncCarriers();
+}
+function syncCarriers(){
+  const mk = el('sel-market').value;
+  const codes = [...new Set(D.leases.filter(l=>l.market_code===mk).map(l=>l.carrier_code))];
+  const list = codes.length ? codes : D.carriers.map(c=>c.carrier_code);
+  el('sel-carrier').innerHTML = list.map(c=>{
+    const n = (D.carriers.find(x=>x.carrier_code===c)||{}).carrier_name || c;
+    return `<option value="${c}">${n}</option>`;}).join('');
+}
+
+fetch('demo_data.json').then(r=>r.json()).then(d=>{
+  D = d;
+  el('c-panel').textContent = (d.counts.carrier_panel_obs||0).toLocaleString();
+  el('c-alloc').textContent = d.counts.allocations;
+  el('c-lease').textContent = d.counts.leases;
+  el('c-src').textContent = d.sources.length;
+  el('lt-period').textContent = 'latest period';
+  populate();
+  renderAll();
+  ['sel-market','sel-carrier','sel-metric','sel-range'].forEach(id=>{
+    el(id).addEventListener('change', e=>{
+      if(id==='sel-market'){ syncCarriers(); }
+      renderAll();
+    });
+  });
+}).catch(()=>{ el('c-panel').textContent='—'; });
+
+fetch('news.json').then(r=>r.json()).then(n=>{
+  el('news').innerHTML = n.items.map(i=>`
+    <div class="card"><h3 style="font-size:.92rem">${i.title}</h3>
+      <p class="meta">${i.topic} · ${i.source}</p>
+      <p style="font-size:13px;color:var(--muted)">${(i.summary||'').slice(0,190)}…</p>
+      <a href="${i.url}" target="_blank" rel="noopener">source →</a></div>`).join('');
+}).catch(()=>{ el('news').innerHTML='<p class="meta">news.json not generated yet — run <code>etl/news_updater.py</code>.</p>'; });
+
+fetch('freshness.json').then(r=>r.json()).then(f=>{
+  el('freshness').textContent = `pipeline last ran ${f.generated_at} · ${(f.panel_rows||0).toLocaleString()} panel rows · latest ${f.latest_period||'n/a'}`;
+}).catch(()=>{});
+</script>
+</body>
+</html>

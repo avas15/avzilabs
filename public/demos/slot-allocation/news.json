@@ -1,0 +1,66 @@
+{
+ "generated_at": "2026-08-17T20:49:03+00:00",
+ "items": [
+  {
+   "item_id": "wikipedia:Air_traffic_control",
+   "fetched_at": "2026-08-17T20:49:03+00:00",
+   "published": "2026-07-16T13:44:26",
+   "title": "Air traffic control",
+   "summary": "Air traffic control (ATC) is a service provided by ground-based air traffic controllers who direct aircraft on the ground and through controlled airspace. The primary purpose of ATC is to prevent collisions, organise and expedite the flow of air traffic, and provide information and other support for pilots. In some countries, ATC can also provide advisory services to aircraft in non-controlled airspace. \nControllers monitor the location of aircraft in their assigned airspace using radar and communicate with pilots by radio. To prevent collisions, ATC enforces traffic separation rules, which en",
+   "url": "https://en.wikipedia.org/wiki/Air_traffic_control",
+   "source": "wikipedia",
+   "topic": "operations"
+  },
+  {
+   "item_id": "wikipedia:Airport_slot",
+   "fetched_at": "2026-08-17T20:49:03+00:00",
+   "published": "2026-07-06T07:59:21",
+   "title": "Airport slot",
+   "summary": "A landing slot, takeoff slot, or airport slot is a permission granted by a slot coordinator to use the infrastructure of an airport designated as Level 3 for take-off and/or landing at a specific time and date. Slots should be administered by an independent slot coordinator, often a government aviation regulator such as the U.S. Federal Aviation Administration. In some countries, airport operators are appointed as coordinators even though they are interested parties.",
+   "url": "https://en.wikipedia.org/wiki/Airport_slot",
+   "source": "wikipedia",
+   "topic": "allocation"
+  },
+  {
+   "item_id": "wikipedia:Instrument_landing_system",
+   "fetched_at": "2026-08-17T20:49:03+00:00",
+   "published": "2026-08-06T18:22:25",
+   "title": "Instrument landing system",
+   "summary": "In aviation, the instrument landing system (ILS) is a precision radio navigation system that provides short-range guidance to aircraft to allow them to approach a runway at night or in bad weather. In its original form, it allows a pilot, through a cockpit mounted instrument in the aircraft that displays lateral and vertical guidance indications (needles), to approach until the aircraft is 200 feet (61\u00a0m) over the ground, within 1\u20442 mile (800\u00a0m) of the runway. At that point the runway should be visible to the pilot; if it is not, they perform a missed approach. Bringing the aircraft this close",
+   "url": "https://en.wikipedia.org/wiki/Instrument_landing_system",
+   "source": "wikipedia",
+   "topic": "infrastructure"
+  },
+  {
+   "item_id": "wikipedia:Runway",
+   "fetched_at": "2026-08-17T20:49:03+00:00",
+   "published": "2026-06-29T18:32:55",
+   "title": "Runway",
+   "summary": "In aviation, a runway is an elongated, rectangular surface designed for the landing and takeoff of an aircraft. Runways may be a human-made surface or a natural surface. Runways, taxiways and ramps, are sometimes referred to as \"tarmac\", though very few runways are built using tarmac. Takeoff and landing areas defined on the surface of water for seaplanes are generally referred to as waterways. Runway lengths are now commonly given in meters worldwide, except in North America where feet are commonly used.",
+   "url": "https://en.wikipedia.org/wiki/Runway",
+   "source": "wikipedia",
+   "topic": "infrastructure"
+  },
+  {
+   "item_id": "wikipedia:Airline_alliance",
+   "fetched_at": "2026-08-17T20:49:03+00:00",
+   "published": "2026-08-13T03:04:45",
+   "title": "Airline alliance",
+   "summary": "\nAn airline alliance is an aviation industry arrangement between two or more airlines agreeing to cooperate on a substantial level. Alliances may provide marketing branding to facilitate travelers making inter-airline codeshare connections within countries. This branding may involve unified aircraft liveries of member aircraft.",
+   "url": "https://en.wikipedia.org/wiki/Airline_alliance",
+   "source": "wikipedia",
+   "topic": "market"
+  },
+  {
+   "item_id": "wikipedia:Sustainable_aviation_fuel",
+   "fetched_at": "2026-08-17T20:49:03+00:00",
+   "published": "2026-08-09T22:50:43",
+   "title": "Aviation biofuel",
+   "summary": "An aviation biofuel is a biofuel used to power aircraft. The International Air Transport Association (IATA) considers it a key element in reducing the environmental impact of aviation. Aviation biofuel is used to decarbonize medium and long-haul air travel. These types of travel generate the most emissions. Synthetic paraffinic kerosene (SPK) refers to any non-petroleum-based fuel designed to replace kerosene jet fuel, which is often, but not always, made from biomass.",
+   "url": "https://en.wikipedia.org/wiki/Aviation_biofuel",
+   "source": "wikipedia",
+   "topic": "policy"
+  }
+ ],
+ "attribution": "Content from Wikipedia, CC BY-SA 4.0"
+}

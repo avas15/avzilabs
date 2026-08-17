@@ -1,0 +1,19 @@
+{
+ "generated_at": "2026-08-17T21:07:15+00:00",
+ "allocations": 34,
+ "leases": 116,
+ "panel_rows": 15323,
+ "latest_period": "2025Q4",
+ "sources": [
+  {
+   "source": "fleetstats-quarterly",
+   "label": "FleetStats Quarterly Carrier Panel (synthetic)",
+   "vintage": "2026-04-01"
+  },
+  {
+   "source": "carrier-filings",
+   "label": "Carrier published results (synthetic)",
+   "vintage": "2026-05-15"
+  }
+ ]
+}
