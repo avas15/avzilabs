@@ -36,3 +36,10 @@ desktop.ini
 public/media/**/*.mp4
 public/media/**/*.webm
 public/media/**/*.mov
+
+# generated CV - carries a personal phone number, never commit
+private/
+
+# wrangler local build artifacts
+.wrangler/
+workers/**/.wrangler/

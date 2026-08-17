@@ -1,0 +1,70 @@
+---
+title: 'Beauty contest scoring model'
+summary: 'A scoring and valuation model for comparative selection awards, where spectrum goes to the best proposal rather than the highest bid. Built to answer what a commitment is actually worth before offering it.'
+description: 'A quantitative model for spectrum beauty contests: criteria weighting, commitment costing via DCF and Monte Carlo, and sensitivity analysis on the scoring rule itself.'
+kind: 'data'
+year: 2026
+status: 'case-study'
+stack: ['Python', 'Monte Carlo', 'DCF', 'pandas']
+order: 10
+---
+
+Not all spectrum is auctioned. In a comparative selection process, sometimes called a beauty
+contest, the regulator scores proposals against published criteria and awards to the best one.
+Coverage obligations, deployment timetables, wholesale access terms, sometimes price.
+
+This is harder to prepare for than an auction, and the reason is worth stating plainly: in an
+auction you are trying to work out what the spectrum is worth to you. In a beauty contest you
+are trying to work out what a *promise* costs you, and then how many points that promise buys.
+
+## Costing a commitment
+
+Every criterion in a beauty contest translates into a commitment, and every commitment has a
+cost that lands somewhere on a fifteen-year cash flow.
+
+A coverage obligation is a rollout schedule: sites, backhaul, power, civils, and the operating
+cost of running them in places that will not pay for themselves. A deployment deadline is an
+option you have sold, because it removes your ability to wait for equipment prices to fall. A
+wholesale access commitment is margin given away on traffic you would otherwise have carried
+yourself.
+
+Each of those is modelled as an incremental cash flow and discounted at WACC. That gives a cost
+per commitment in present value terms, which is the only basis on which two criteria can
+sensibly be compared.
+
+## Where the uncertainty goes
+
+Point estimates are worse than useless here because the inputs genuinely are not known. Build
+cost per site, subscriber uptake in low-density areas, and equipment price trajectories all have
+real distributions rather than values.
+
+So the commitment costs run as a Monte Carlo, with the correlations that matter left in.
+Rollout cost and uptake are not independent, and treating them as if they were understates the
+variance in exactly the direction that makes an aggressive bid look safe.
+
+The output is a distribution of the total cost of a proposal, which supports a different and
+better question than "what does this cost". It supports "what is the chance this proposal costs
+more than the spectrum is worth to us".
+
+## Scoring the scoring rule
+
+The part that surprised me most. The published scoring rule is itself a model input, and it is
+usually more sensitive than it looks.
+
+Most schemes normalise each criterion against the best submission, then apply weights. That
+means your score depends on what everyone else offered, so the marginal value of one more
+percentage point of coverage is a function of competitor behaviour you cannot observe. Small
+changes in weighting, or in how a criterion is normalised, can reorder the outcome entirely.
+
+The model therefore treats the scoring rule as something to run sensitivities across rather than
+a fixed constraint. The useful output is the region where a proposal wins across most plausible
+competitor scenarios, not the single proposal that maximises the score against one guess.
+
+## What it produced
+
+A defensible answer to the question that actually gets asked in the room: how much more can we
+commit before the award stops being worth winning. That is a number, it has a distribution
+around it, and both come from the same model.
+
+Method and structure only here. The underlying figures, country positions and commercial
+inputs are not published.

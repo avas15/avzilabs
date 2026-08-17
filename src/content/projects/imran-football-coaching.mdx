@@ -1,0 +1,57 @@
+---
+title: 'Imran Football Coaching'
+summary: 'A site for a football coaching business, and a CRM to go with it: sessions, players, attendance and payments, wired into the WhatsApp and Gmail he already runs the business from.'
+description: 'Website and custom CRM for a football coaching business, integrating scheduling, attendance and payment tracking with existing WhatsApp and email workflows.'
+kind: 'webapp'
+year: 2026
+status: 'in-development'
+stack: ['Astro', 'TypeScript', 'SQLite', 'WhatsApp Business API', 'Gmail API']
+order: 14
+---
+
+A coaching business runs on a phone. Parents message on WhatsApp to book, cancel and ask about
+kit, payments arrive by bank transfer with a reference that may or may not identify the child,
+and the record of who attended what is a coach's memory plus a notes app.
+
+That works until it does not, and the failure mode is always the same: a session gets doubled
+booked, or a term of fees goes uncollected because nobody could reconstruct who came.
+
+## The site
+
+The straightforward half. What is offered, when and where, who it is for, and how to get in
+touch, built to be found by a parent searching for coaching in the area. Fast, mobile-first, and
+honest about the fact that most visitors will be on a phone in a car park.
+
+## The CRM
+
+The half that changes the business.
+
+Players and guardians, sessions and schedules, attendance, and payments reconciled against
+sessions rather than tracked as a running balance. The essential feature is not any one of
+those: it is that they are the same record, so "who owes for last term" and "who has not
+attended in a month" become queries instead of archaeology.
+
+## Meeting him where he already works
+
+The design constraint that matters. A CRM that requires a coach to stop using WhatsApp will not
+be used, because WhatsApp is what the parents use and he does not get to change that.
+
+So the integration goes the other way. WhatsApp threads link to the player record, so the
+conversation history sits alongside the attendance and payment history rather than in a
+different app. Booking and cancellation messages are parsed into proposed changes that he
+confirms rather than retypes. Session reminders and payment nudges send from the channel parents
+already read, with the awkward but necessary detail that WhatsApp Business templates have to be
+approved in advance, so the message catalogue is part of the build rather than an afterthought.
+
+Gmail is connected on the same principle: enquiries land as leads against a record instead of
+sitting in an inbox, and invoices and receipts thread against the player they belong to.
+
+## Status
+
+Site first, CRM second, because the site earns enquiries immediately and the CRM only pays off
+once there is enough activity to lose track of. Building the CRM before the demand exists would
+be building the wrong thing carefully.
+
+The integrations are the risk, and it is worth stating plainly: WhatsApp Business API access has
+real approval requirements and per-message costs, and both need to be settled before that part
+of the design is committed to rather than assumed.

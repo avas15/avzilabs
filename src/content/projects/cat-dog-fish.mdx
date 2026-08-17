@@ -1,0 +1,75 @@
+---
+title: 'Cat Dog Fish'
+summary: 'Spin for a letter, fill every category before the clock runs out, then argue about whether Aardwolf counts. Up to 10 players, in the browser, free.'
+description: 'A real-time multiplayer party game built on Cloudflare Workers and Durable Objects. Letter wheel, category sheets, duplicate-aware scoring and a community dictionary decided by vote.'
+kind: 'game'
+year: 2026
+status: 'live'
+featured: true
+genres: ['Party', 'Multiplayer', 'Word game']
+stack: ['TypeScript', 'Cloudflare Workers', 'Durable Objects', 'WebSockets']
+order: 0
+links:
+  - label: 'Play now'
+    href: '/play/cat-dog-fish'
+    primary: true
+---
+
+The game everyone's family plays on paper, except the arguing is now a formal procedure.
+
+A wheel picks a letter. Everyone has the same list of categories, and a timer. Write an animal,
+a food, a boy's name, a chocolate, whatever the host configured. Unique answers score 10. If
+somebody else wrote the same thing, you both get 5, which is the rule that makes the game
+interesting: the obvious answer is worth half as much as the one nobody else thought of.
+
+## The protest
+
+The part I actually enjoyed building.
+
+If the game rejects your answer you can protest it, and everyone else votes. It needs **more
+than two thirds** of the votes cast to stand. Abstentions do not count against you, so two
+people wandering off to make tea cannot sink a fair word, but a tie goes to the original
+ruling.
+
+Words that survive a protest are written to a **community dictionary** that outlives the room,
+so a word won in one game is recognised in the next. It is kept deliberately separate from any
+official word list: "the table voted this in" and "this is in the dictionary" are different
+claims and should never be silently merged.
+
+A successful protest triggers a **full re-score of the round**, not a patch to the protester's
+line. That matters more than it sounds. Reinstating your answer can turn somebody else's unique
+answer into a duplicate, and their score has to move too. Patching one row would quietly desync
+the scoreboard from the rules.
+
+## Architecture
+
+One Durable Object per room holds the authoritative state, with a second shared object for the
+community dictionary. The server owns the clock, the letter, and every scoring decision, so
+nothing in the browser can change the outcome. Answers are not broadcast during a round, which
+is the difference between a game and an exercise in opening devtools.
+
+Round timing runs on Durable Object alarms rather than client timers, so the round ends when the
+server says it does. WebSocket hibernation means an idle room costs nothing while it waits for
+someone to come back from the kitchen.
+
+## Rules that had to be decided
+
+Small things that decide whether the game feels fair:
+
+- **Leading articles are ignored.** "The Antelope" counts for A, not T. Otherwise every round
+  has an argument in it.
+- **Accents fold.** "Crème" and "Creme" are the same answer, so one player's keyboard layout
+  does not hand them a free 10 points.
+- **Invalid answers cannot form a duplicate group.** If two people both write something that
+  does not count, neither gets the duplicate score for matching.
+- **Empty is zero, never a penalty.** Leaving a box blank is not the same as being wrong, and
+  the optional penalty only applies to a real attempt.
+
+## Finishing first
+
+Whoever fills their sheet first starts a short countdown for everyone else. Whatever is written
+when it ends still counts. It turns the end of a round into a scramble rather than a slow drift,
+and it is configurable, including off.
+
+Everything else is configurable too: categories, round length, points, the penalty, which
+letters the wheel can land on, and whether a letter can repeat within a game.

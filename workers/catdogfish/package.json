@@ -1,0 +1,21 @@
+{
+  "name": "avzilabs-letters",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Realtime letter-and-categories party game. Cloudflare Worker plus a SQLite Durable Object per room.",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20260811.1",
+    "@types/ws": "^8.18.1",
+    "typescript": "^5.7.3",
+    "vitest": "^4.1.10",
+    "wrangler": "^4.123.0",
+    "ws": "^8.21.3"
+  }
+}

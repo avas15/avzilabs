@@ -1,0 +1,74 @@
+---
+title: 'Local AI stack and retrieval'
+summary: 'Qwen and Gemma on llama.cpp, with RAG and indexing over regulatory documents and a large personal library. Private data never leaves the machine, which is the whole reason it exists.'
+description: 'A local LLM stack running Qwen and Gemma through llama.cpp, with retrieval-augmented generation, embeddings, OCR and text-to-speech over private document collections.'
+kind: 'tool'
+year: 2026
+status: 'in-development'
+stack: ['llama.cpp', 'Qwen', 'Gemma', 'Python', 'FAISS', 'OCR']
+order: 5
+---
+
+Two retrieval systems and the local stack underneath them.
+
+## Why local
+
+Some of what I work with is commercially sensitive: internal holdings, valuation inputs,
+regulatory correspondence. Sending that to a hosted API is a policy question I would rather not
+have to answer, and "the provider says they do not train on it" is a promise rather than a
+property.
+
+Running the model on my own hardware removes the question entirely. Qwen through llama.cpp for
+general work, Gemma where a smaller and faster model is enough. Quantised to fit real hardware,
+served locally, no key, no egress.
+
+That is not a claim that local models match frontier ones. They do not, on hard reasoning. But
+retrieval, extraction, classification, summarisation and reformatting are most of the actual
+work, and a good local model does those well. Knowing where that line sits, and routing across
+it deliberately, is the skill worth having.
+
+## The spectrum retrieval system
+
+An index over regulatory documents and the internal spectrum database, so a question in plain
+English gets an answer grounded in the actual filings rather than the model's memory.
+
+The hard part was never the generation. It was the chunking. Regulatory documents are heavily
+structured, and naive fixed-size chunking destroys exactly the structure that carries meaning: a
+condition attached to a licence lands in a different chunk from the licence it modifies, and the
+retrieval then confidently returns a condition belonging to something else.
+
+So chunking follows document structure, retrieval carries the surrounding context, and each
+answer cites the passage it came from. That last part matters most. An uncited answer about a
+licence condition is unusable, because verifying it costs the same as looking it up yourself.
+
+Many of the source documents are scanned, so there is an OCR stage in front, with the usual
+tedious work around tables and multi-column layouts.
+
+## The library retrieval system
+
+The same architecture pointed at a large personal collection of books and course material,
+indexed and embedded so it can be queried directly. A sample of books and courses, trained and
+indexed for retrieval.
+
+Different failure mode from the regulatory corpus, and it taught me more. Long-form prose has
+no structural anchors to chunk on, and semantic similarity alone will happily return five
+passages that all say the same thing. Diversity in retrieval turned out to matter more than
+raw relevance: five near-identical hits are worth less than three that approach the question
+from different directions.
+
+## Text to speech
+
+The stack also does local text-to-speech, which started as a convenience for turning notes and
+long documents into something I could listen to, and stayed because a locally generated voice
+has the same privacy property as everything else here.
+
+## Agentic tooling
+
+Day to day I run Claude Code as the main harness, with a set of MCP servers I have built for the
+tools I actually use. See the [MCP toolchain](/projects/mcp-toolchain) for those.
+
+Worth noting the workflow that came before it: piping context between chatbots with bash and
+PowerShell scripts, hand-managing what stayed in the window, and compressing structured data
+into terser representations to fit more of it in. Crude, and it worked. It also taught me what
+agentic tooling is actually solving, which makes it much easier to tell when a tool is genuinely
+helping and when it is just spending tokens.

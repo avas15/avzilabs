@@ -1,11 +1,11 @@
 ---
 title: 'Local Coder'
 summary: 'A desktop coding agent that runs entirely against local models. No API keys, no per-token bill, no code leaving the machine.'
-description: 'Local Coder is an Electron desktop application providing an AI coding agent backed by locally hosted language models via LM Studio.'
+description: 'Local Coder is an Electron desktop application providing an AI coding agent backed by local Qwen and Gemma models served through llama.cpp.'
 kind: 'tool'
 year: 2026
 status: 'prototype'
-stack: ['Electron', 'Node.js', 'Express', 'LM Studio']
+stack: ['Electron', 'Node.js', 'llama.cpp', 'Qwen', 'Gemma']
 order: 7
 ---
 
@@ -21,8 +21,9 @@ that question does not arise, and you do not have to trust a policy document abo
 
 ## How it works
 
-An Electron shell around a local server that speaks to LM Studio, with the agent loop, tool
-calling and file editing handled locally. It ships as a portable executable, so there is no
+An Electron shell around a local server that speaks to llama.cpp, running Qwen for general
+coding work and Gemma where a smaller, faster model is enough. The agent loop, tool calling
+and file editing are all handled locally. It ships as a portable executable, so there is no
 install step and nothing to uninstall.
 
 Alongside the core agent it grew a few things I needed: an image generation integration, model

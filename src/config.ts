@@ -22,6 +22,13 @@ export const SITE = {
  */
 export const UNDER_DEVELOPMENT = false;
 
+/**
+ * Origin of the realtime game Worker. Overridable at build time so a local
+ * `wrangler dev` can be pointed at during development.
+ */
+export const GAME_ORIGIN =
+  import.meta.env.PUBLIC_GAME_ORIGIN ?? 'https://play.avzilabs.com';
+
 export const SOCIAL = {
   github: 'https://github.com/avas15',
   email: 'avas.saeed@gmail.com',

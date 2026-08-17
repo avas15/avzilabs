@@ -1,0 +1,75 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { GAME_ORIGIN } from '@/config';
+
+const title = 'Cat Dog Fish';
+const description =
+  'A browser party game for up to 10 players. Spin for a letter, race to fill every category, and argue about whether Aardwolf counts. Free, no accounts, no ads.';
+
+const gameSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'VideoGame',
+  name: 'Cat Dog Fish',
+  description,
+  applicationCategory: 'Game',
+  gamePlatform: 'Web browser',
+  playMode: 'MultiPlayer',
+  numberOfPlayers: { '@type': 'QuantitativeValue', minValue: 2, maxValue: 10 },
+  offers: { '@type': 'Offer', price: '0', priceCurrency: 'GBP' },
+  author: { '@type': 'Person', name: 'Avas Saeed' },
+};
+---
+
+<BaseLayout title={title} description={description} schema={[gameSchema]}>
+  <section class="mx-auto max-w-5xl px-5 pt-28 pb-16 sm:px-8 sm:pt-32">
+    <h1 class="glow text-3xl font-800 tracking-tight text-brand sm:text-4xl">
+      cat dog fish
+    </h1>
+    <p class="mt-3 max-w-2xl text-[14px] leading-relaxed text-ink-2">
+      Spin the wheel, get a letter, fill every category before the clock runs out. Unique
+      answers score more than ones somebody else also thought of. Up to 10 players, no account,
+      no ads.
+    </p>
+
+    <!-- The whole game mounts here and swaps its own screens. -->
+    <div id="cdf" data-origin={GAME_ORIGIN} class="mt-8"></div>
+
+    <noscript>
+      <p class="term p-5 text-[13px] text-warn">
+        This game needs JavaScript. It is a real-time multiplayer game, so there is no
+        meaningful version of it that works without.
+      </p>
+    </noscript>
+
+    <details class="term term-corners mt-10">
+      <summary class="term-bar cursor-pointer select-none">how scoring works</summary>
+      <div class="space-y-2 p-5 text-[13px] leading-relaxed text-ink-2">
+        <p>
+          <span class="text-brand">Unique answer</span> scores 10. If anyone else wrote the same
+          thing, you both get 5. Blank scores nothing.
+        </p>
+        <p>
+          Answers must start with the round letter. Leading "the" and "a" are ignored, so
+          <span class="text-ink">The Antelope</span> counts for A, and accents are folded, so
+          <span class="text-ink">Creme</span> and <span class="text-ink">Crème</span> collide.
+        </p>
+        <p>
+          If your answer gets rejected you can <span class="text-brand">protest</span> it. Everyone
+          else votes. It needs more than two thirds to stand, and abstentions do not count against
+          you. A word that survives a protest is added to the community dictionary, kept separate
+          from any official word list, and is recognised in later games.
+        </p>
+        <p>
+          The host sets round length. Whoever finishes first starts a short countdown for
+          everyone else; whatever is written when it ends still counts.
+        </p>
+      </div>
+    </details>
+  </section>
+</BaseLayout>
+
+<script>
+  import { mountGame } from '@/scripts/cat-dog-fish';
+  const el = document.getElementById('cdf');
+  if (el) mountGame(el, el.dataset.origin || '');
+</script>

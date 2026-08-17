@@ -1,0 +1,58 @@
+---
+title: 'Superapp asset viewer'
+summary: 'A browser for tens of thousands of game assets across a dozen licensed packs, with previews, so I stop rebuying things I already own and stop hand-rolling things I already have.'
+description: 'A local asset catalogue and viewer indexing large licensed game asset libraries with thumbnails, metadata extraction and search.'
+kind: 'tool'
+year: 2026
+status: 'prototype'
+stack: ['Electron', 'Node.js', 'SQLite', 'Blender', 'ffmpeg']
+order: 13
+---
+
+Buy asset packs for a few years and you end up with a problem that is genuinely annoying: tens
+of thousands of models, textures, sounds and animations across a dozen libraries, in folder
+structures nobody designed to be browsed together.
+
+The practical symptom is that you cannot find what you own. So you hand-roll something you
+already have, or worse, buy it a second time.
+
+## What it does
+
+Indexes every pack into one searchable catalogue, with a preview for everything.
+
+Meshes get a rendered thumbnail plus triangle count, bounds, material slots and whether they
+carry a rig. Textures get a thumbnail, resolution and channel layout, which is the bit that
+actually decides whether a texture is usable in a given pipeline. Audio gets a waveform, a
+duration and an inline player. Animations get frame count, duration and the rig they target,
+because an animation on the wrong rig is worse than no animation.
+
+Search runs across name, pack, type, tags and the extracted metadata, so "rigged character
+under 20k triangles" is a query rather than an afternoon.
+
+## Building it
+
+Thumbnail generation is the whole job. Blender runs headless in batch to render mesh previews,
+ffmpeg handles audio waveforms and video, and image formats are processed directly. It is
+embarrassingly parallel and entirely IO-bound, so the work went into a job queue with a
+concurrency cap and resumability, because a full index of a large library takes hours and must
+survive being interrupted.
+
+Everything is content-hashed. Re-indexing only touches what actually changed, and identical
+files that appear in three packs under three names are collapsed into one entry with three
+paths. That last part removed more duplication than I expected.
+
+The catalogue is SQLite with full-text search over the metadata. Local, single file, no server,
+fast enough at this scale that anything more would be architecture for its own sake.
+
+## Licensing
+
+The viewer indexes and previews assets already licensed to me. It stores paths and derived
+metadata rather than redistributing anything, and it is a local tool, not a service. That
+distinction is deliberate: most of these packs permit use in projects but not redistribution,
+and a tool that quietly blurred that line would be a liability rather than a convenience.
+
+## Why it is worth having
+
+The real return is not organisation, it is scope. Knowing what is already available changes
+what feels feasible at the start of a project, and the answer to "can we do X" is much more
+often yes when you can see that most of X is already sitting on the drive.

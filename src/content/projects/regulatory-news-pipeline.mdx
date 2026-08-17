@@ -1,0 +1,57 @@
+---
+title: 'Regulatory intelligence pipeline'
+summary: 'A daily automated sweep of regulator publications and industry sources, deduplicated, classified and summarised. Replaced a subscription and a lot of manual checking.'
+description: 'An automated daily pipeline ingesting regulator publications, consultations and industry news into a structured spectrum intelligence database.'
+kind: 'data'
+year: 2026
+status: 'case-study'
+stack: ['Python', 'SQL', 'AWS', 'scraping', 'LLM classification']
+order: 8
+---
+
+Spectrum moves through publications: a consultation opens, an award is announced, a band plan is
+amended, an assignment changes hands. It is all public, and it is scattered across dozens of
+regulator sites in several languages, on no common schedule and in no common format.
+
+The old approach was checking manually and paying a third party for the rest. This replaced
+both.
+
+## The pipeline
+
+A scheduled daily sweep across regulator sites and industry sources. Each source has its own
+adapter, because they genuinely are all different: some publish clean RSS, some have a search
+page that must be walked, and some post PDFs to a directory listing with no index at all.
+
+Fetched documents are normalised, deduplicated, classified by band and country, and summarised.
+Everything lands in the same structured database the rest of the spectrum tooling reads from, so
+a change in a regulator's publication becomes a change in the internal record rather than an
+email somebody has to action.
+
+## The parts that were actually hard
+
+**Deduplication.** The same award gets covered by the regulator, two trade publications and an
+operator press release, all with different wording. Exact matching catches almost none of it.
+Near-duplicate detection on embeddings plus a date and entity check gets most of it, and the
+threshold is a genuine tradeoff: too tight and the feed is repetitive, too loose and a real
+follow-up development gets swallowed as a duplicate of the original story.
+
+**Change detection.** A regulator quietly amending a page is more interesting than a new
+publication, and much harder to notice. Content hashing per source, with the noisy furniture
+stripped out first, otherwise a rotating banner marks the whole page as changed every single
+day.
+
+**Failing loudly.** A scraper that silently returns nothing is worse than one that crashes,
+because the feed just looks quiet and everyone assumes nothing happened. Each source has an
+expected volume range and alerts when it falls outside, so a site redesign surfaces as an alert
+rather than as a gap somebody notices weeks later.
+
+**Classification.** Band and country extraction is mostly deterministic parsing with an LLM
+fallback for the awkward cases, not the other way round. Regex is cheaper, faster and more
+predictable for the ninety percent that follows a pattern; the model handles the tail.
+
+## What it changed
+
+It removed a recurring third-party data cost, and more usefully it changed the latency. A
+consultation opening is known the day it opens rather than whenever somebody happened to check,
+and the database behind the benchmarking and valuation work is current by default rather than as
+a result of somebody remembering to update it.

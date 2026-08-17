@@ -1,0 +1,66 @@
+---
+title: 'MCP toolchain'
+summary: 'Model Context Protocol servers that let a coding agent drive FL Studio, Photoshop and Unity directly. Not chat about the software, actually operating it.'
+description: 'A set of Model Context Protocol servers exposing FL Studio, Photoshop and the Unity Editor as agent-callable tools, built for use with Claude Code.'
+kind: 'tool'
+year: 2026
+status: 'in-development'
+stack: ['TypeScript', 'Python', 'MCP', 'Unity C#', 'Photoshop UXP']
+order: 6
+---
+
+A coding agent that can only edit text is doing a fraction of the job. Most creative software
+has a scripting surface already; MCP is a way to hand that surface to the agent as typed,
+callable tools.
+
+I have built servers for the three I use most.
+
+## Unity
+
+The largest by a distance, and the one that earns its keep daily. It exposes the editor as
+tools: scene graph queries, object creation and transforms, material and shader assignment,
+prefab work, animator construction, lighting and navmesh bakes, physics queries, play mode
+control, and screenshots so the agent can see the result of what it just did.
+
+That last one changed how useful the whole thing is. An agent that can take a screenshot of the
+scene view can check its own work, and the difference between "the code compiled" and "the
+thing looks right" is most of game development.
+
+The interesting design problem was granularity. Too fine and the agent spends its context
+issuing hundreds of tiny calls; too coarse and the tools only do the exact thing you imagined.
+The version that works exposes composite operations for common intent, with primitives
+underneath for when the composite is wrong.
+
+## Photoshop
+
+Document and layer operations through the UXP scripting API: creating documents, text and solid
+colour layers, reading selection state, saving out. Useful for generating asset variants
+programmatically rather than by hand.
+
+## FL Studio
+
+The most awkward of the three, because the automation surface is the least designed for it.
+Worth doing anyway: the parts that are scriptable cover a lot of the repetitive work in a
+project, and repetitive work is exactly what should not be done by hand.
+
+## What building them taught me
+
+Three things, in increasing order of importance.
+
+**Tool descriptions are prompts.** The description is what the model reads to decide whether to
+call the thing. A precise description with an example is worth more than a clever
+implementation, and most tools that "do not work" are tools the model never selected.
+
+**Return values should be small and structured.** A tool that dumps a whole scene graph burns
+the context that the agent needed to act on it. Returning a summary plus a handle to fetch more
+is almost always right.
+
+**Failure messages should say what to do next.** "Object not found" wastes a turn. "Object not
+found; the nearest matches are X, Y, Z" gets it right on the retry. The error path is part of
+the interface, not an afterthought.
+
+## How I work with them
+
+Claude Code as the harness, with these servers attached, plus skills for the workflows I repeat.
+The stack pairs with the [local AI stack](/projects/local-ai-stack) for anything involving
+private data, where the work runs against Qwen or Gemma on my own hardware instead.

@@ -1,0 +1,64 @@
+---
+title: 'MSS valuation and GIS coverage modelling'
+summary: 'Valuation tooling for mobile satellite spectrum, built on population and terrain data rather than national averages. Because a satellite band is worth what the ground under it is worth.'
+description: 'Geospatial valuation tooling for mobile satellite service spectrum: gridded population and terrain analysis feeding a coverage-based valuation model.'
+kind: 'data'
+year: 2026
+status: 'case-study'
+stack: ['Python', 'GeoPandas', 'rasterio', 'PostGIS', 'Monte Carlo']
+order: 11
+---
+
+Terrestrial spectrum benchmarking usually runs on national aggregates: price per MHz per head of
+population, adjusted for licence term. It is crude but it works, because a national mobile
+network really does aim to cover most of a country.
+
+Mobile satellite spectrum breaks that assumption completely, and the standard method quietly
+gives the wrong answer.
+
+## Why population per head fails here
+
+A satellite band's value is not distributed like a country's population. Its advantage is
+precisely in the places terrestrial networks do not reach: at sea, over mountains, across the
+areas where putting up a mast is uneconomic or impossible.
+
+Valuing it on national population credits it for urban users who will never use it, and gives it
+no credit for the maritime and remote coverage that is the entire commercial case. The
+directional error is large and consistent.
+
+## Doing it geospatially instead
+
+The tooling works on a grid rather than a country.
+
+Gridded population data is intersected with terrain and with modelled terrestrial coverage to
+classify every cell: well served, marginally served, or genuinely uncovered. Maritime zones are
+brought in separately, since the addressable demand there is vessels and routes rather than
+residents, and needs its own density model.
+
+The result is an addressable population and an addressable area that mean something for this
+band specifically, instead of a national figure that describes a different product.
+
+## Feeding it into value
+
+From there the valuation is conventional and deliberately so: addressable demand drives a
+subscriber and ARPU model, that drives cash flows, those discount at WACC, and the whole thing
+runs as a Monte Carlo because the uptake assumptions in remote and maritime segments are wide.
+
+The geospatial work is upstream of the finance, not a substitute for it. What changes is the
+input quality, and that is where the error was.
+
+## The comparison that made the case
+
+The clearest output was running both methods on the same band and showing the gap. Where a
+naive per-head benchmark and a coverage-weighted model disagree by a large multiple, the
+argument stops being about methodology preference and becomes about which number to put in
+front of a board.
+
+## Practical notes
+
+Most of the effort was not modelling. It was projections, resolution mismatches between
+population rasters and coverage polygons, and coastline handling, where a small definitional
+choice about how far offshore to count moves the maritime figure substantially. That definition
+is an input to the model, stated explicitly, rather than an accident of the data.
+
+Method only. The datasets, bands and commercial inputs are not published.

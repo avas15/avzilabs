@@ -1,0 +1,77 @@
+---
+title: 'Multiplayer netcode and game algorithms'
+summary: 'Host-authoritative netcode, prediction and reconciliation across three games, and the data structures that make the simulation cheap enough to run at frame rate.'
+description: 'Notes on multiplayer netcode architecture, client prediction and reconciliation, spatial data structures and pathfinding across Unity and browser-based multiplayer games.'
+kind: 'game'
+year: 2026
+status: 'case-study'
+stack: ['C#', 'TypeScript', 'Netcode for GameObjects', 'WebSockets']
+order: 12
+---
+
+Three multiplayer projects with genuinely different constraints, and the thing they taught me is
+that netcode architecture is decided by one question: what happens when two players disagree.
+
+## Authority
+
+Every design here is host-authoritative, and the reason is simple. If clients are authoritative
+over their own state, the game is only as honest as its least honest player, and the failure is
+not detectable from inside the system.
+
+So the host simulates and everyone else predicts. Inputs go up, authoritative state comes back,
+and clients reconcile the difference. The cost is latency on your own actions, which is the
+problem prediction exists to hide.
+
+## Prediction and reconciliation
+
+Clients apply input locally the moment it happens, then keep a buffer of unacknowledged inputs.
+When authoritative state arrives, the client rewinds to it and replays the buffer forward.
+
+Most of the time the replay lands where the prediction already was and nothing visible happens.
+When it does not, you get a correction, and the entire craft is in making corrections
+unnoticeable. Snapping is honest and looks terrible; smoothing looks better and lies about
+position. The compromise is to snap anything the player cannot see and smooth what they can.
+
+In [Padel](/projects/padel) the hard case is a ball off the back glass, where wall contact and
+the reconciliation window land in the same frame. Correcting the ball after a bounce feels
+wrong in a way correcting a player never does, because the bounce is the thing the player was
+reading.
+
+## Bandwidth is the constraint, not CPU
+
+The instinct is to send more, more often. The discipline is to send less.
+
+Delta compression against the last acknowledged state, quantised positions and rotations rather
+than full floats, interest management so a client is only told about what it could plausibly
+perceive, and an update rate well below frame rate with interpolation covering the gap.
+
+For [Cat Dog Fish](/projects/cat-dog-fish) the constraint inverted: the payloads are tiny but
+correctness is everything, so the server sends full state snapshots and simply refuses to
+include other players' in-progress answers. Cheap, and it makes cheating structurally impossible
+rather than merely difficult.
+
+## Data structures that earn their place
+
+**Spatial partitioning** for the horror game's AI. Naive "which enemies can see the player"
+is O(n) per enemy per frame against every occluder. A uniform grid over the level turns the
+broad phase into a handful of cell lookups, and the expensive raycast only runs on what
+survives it.
+
+**Ring buffers** for input and state history. Fixed size, no allocation, and the reconciliation
+path runs every frame on the client, so an allocation there is a stutter you can feel.
+
+**A\* with a navmesh** for pathfinding, with the usual caveat that the heuristic matters more
+than the implementation. An inadmissible heuristic is faster and produces paths that look
+subtly wrong, and "looks wrong" is the only metric that counts in a game.
+
+**Hash-based deduplication** for the word game's scoring, which is O(n) per category rather
+than the O(n²) pairwise comparison the problem naively suggests. With ten players and sixteen
+categories that difference does not matter at all, which is worth saying: I picked it because
+it is simpler to read, not because it is faster.
+
+## The general lesson
+
+Most of the performance work that mattered was not optimisation. It was choosing a structure
+whose worst case was acceptable, then not having to think about it again. The profiler is for
+finding out you were wrong about that, not for shaving constants off code that should not have
+been in the hot path.

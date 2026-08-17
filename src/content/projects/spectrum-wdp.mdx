@@ -1,0 +1,90 @@
+---
+title: 'SpectrumWDP'
+summary: 'A winner determination and core pricing lab for combinatorial spectrum auctions. Implements the canonical algorithms from the literature and checks them against published results rather than trusting the output.'
+description: 'A combinatorial auction winner determination solver with core-selecting payment rules, built from the auction theory literature and validated against published experimental conditions.'
+kind: 'data'
+year: 2026
+status: 'in-development'
+stack: ['Python', 'MILP', 'NumPy', 'pandas']
+order: 9
+---
+
+Combinatorial auctions let bidders bid on packages rather than individual lots, which is the
+right shape for spectrum because a block is worth more next to another block you already hold.
+The cost is that deciding who won stops being obvious.
+
+## Winner determination
+
+The winner determination problem is: given a set of package bids, choose the subset that
+maximises total value while never selling the same lot twice. It is equivalent to weighted set
+packing and is NP-hard in general, which Rothkopf, Pekeč and Harstad set out along with the
+structures that stay tractable.[^rothkopf] Sandholm's treatment is the one I worked from for
+the search formulation and the pruning that makes realistic instances solvable.[^sandholm]
+
+In practice spectrum auctions are far from the worst case. Lots are few, packages are
+structured, and bidders are subject to eligibility and activity rules that prune the space
+before the solver ever sees it. I formulate it as a mixed integer program and solve directly;
+the interesting work is in generating the instances, not in beating the solver.
+
+## Why pricing is the harder half
+
+Getting the allocation right is the easy part. What the winners should pay is where the design
+actually lives.
+
+Vickrey-Clarke-Groves is truthful and efficient, and almost never used. Ausubel and Milgrom's
+account of why is the clearest statement of the problem: VCG can produce revenues below the
+core, so a losing coalition would have been willing to pay more than the winners did, which is
+politically indefensible when the seller is a government selling public spectrum.[^lovely]
+
+The answer the literature converged on is core-selecting payments: charge the minimum that
+leaves no coalition able to profitably object. Day and Milgrom set out the core-selecting family
+and its incentive properties;[^daymilgrom] Day and Raghavan gave the constraint generation
+approach that makes the bidder-optimal core point actually computable rather than merely
+definable.[^dayraghavan]
+
+The lab implements VCG, the bidder-optimal core, and a nearest-VCG core rule, so the same
+instance can be run through all three and the revenue gap inspected directly. That gap is the
+number that matters in a real design conversation, and it is much easier to argue about when
+you can show it.
+
+## Validating against the literature
+
+The part I insisted on. An auction solver that produces plausible numbers is worthless, because
+plausible is exactly what a subtly wrong implementation produces.
+
+So the algorithms are checked by recreating published experimental conditions and confirming the
+implementation reproduces the reported results before it is pointed at anything real. Cramton's
+survey of spectrum auction design supplied the practical grounding on what real regulators
+actually run and where theory and practice diverge.[^cramton] Milgrom's account of the
+simultaneous ascending auction covers the format most of the European awards I work on actually
+use.[^milgrom]
+
+Where a paper's data is available I run it. Where it is not, I recreate the generator from the
+description and check the aggregate behaviour matches.
+
+## Status
+
+A working lab rather than a product: the solver, the three payment rules, an instance generator
+and the validation harness. It exists to answer questions about auction design with a number
+instead of an intuition.
+
+[^rothkopf]: Rothkopf, M., Pekeč, A. and Harstad, R. (1998). "Computationally Manageable
+    Combinational Auctions." *Management Science* 44(8), 1131-1147.
+
+[^sandholm]: Sandholm, T. (2002). "Algorithm for optimal winner determination in combinatorial
+    auctions." *Artificial Intelligence* 135(1-2), 1-54.
+
+[^lovely]: Ausubel, L. and Milgrom, P. (2006). "The Lovely but Lonely Vickrey Auction." In
+    Cramton, Shoham and Steinberg (eds), *Combinatorial Auctions*, MIT Press.
+
+[^daymilgrom]: Day, R. and Milgrom, P. (2008). "Core-selecting package auctions."
+    *International Journal of Game Theory* 36(3-4), 393-407.
+
+[^dayraghavan]: Day, R. and Raghavan, S. (2007). "Fair Payments for Efficient Allocations in
+    Public Sector Combinatorial Auctions." *Management Science* 53(9), 1389-1406.
+
+[^cramton]: Cramton, P. (2013). "Spectrum Auction Design." *Review of Industrial Organization*
+    42(2), 161-190.
+
+[^milgrom]: Milgrom, P. (2000). "Putting Auction Theory to Work: The Simultaneous Ascending
+    Auction." *Journal of Political Economy* 108(2), 245-272.
