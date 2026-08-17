@@ -30,8 +30,8 @@ interface Props {
 
 const {
   version = 'twilight',
-  blur = '14px',
-  opacity = 0.42,
+  blur = '10px',
+  opacity = 0.7,
   renderScale = 0.5,
 } = Astro.props;
 
@@ -61,7 +61,7 @@ const pct = Math.round(100 / renderScale);
     scrolling="no"
   ></iframe>
   <!-- Darkening veil so body copy keeps its contrast over the rain. -->
-  <div class="absolute inset-0 bg-bg/55"></div>
+  <div class="absolute inset-0 bg-bg/35"></div>
 </div>
 
 <style>
@@ -105,11 +105,14 @@ const pct = Math.round(100 / renderScale);
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
 
     function start() {
-      if (reduced.matches || frame!.src) return;
+      if (reduced.matches || frame!.getAttribute('src')) return;
+      // The reveal listener is attached BEFORE src is set. Attaching it after
+      // races a cached iframe, which can fire load before the listener exists
+      // and leave the layer stuck at opacity 0.
+      frame!.addEventListener('load', () => frame!.classList.add('is-ready'), { once: true });
       // Assigned late and on purpose: setting src in the markup would put a
       // WebGL context and its assets on the critical path.
       frame!.src = frame!.dataset.src!;
-      frame!.addEventListener('load', () => frame!.classList.add('is-ready'), { once: true });
     }
 
     function stop() {
@@ -127,7 +130,14 @@ const pct = Math.round(100 / renderScale);
 
     reduced.addEventListener('change', (e) => (e.matches ? stop() : start()));
 
-    if (document.readyState === 'complete') requestAnimationFrame(start);
-    else window.addEventListener('load', () => requestAnimationFrame(start), { once: true });
+    /*
+      Deliberately not requestAnimationFrame. rAF does not fire while the
+      document is hidden, so a page opened in a background tab, or restored
+      into one, would never start the rain and never recover until something
+      else nudged it. A timeout runs regardless of compositing state and still
+      leaves first paint well alone.
+    */
+    if (document.readyState === 'complete') setTimeout(start, 200);
+    else window.addEventListener('load', () => setTimeout(start, 200), { once: true });
   }
 </script>

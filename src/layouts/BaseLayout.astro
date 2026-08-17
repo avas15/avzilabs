@@ -131,7 +131,9 @@ const personSchema = {
     </script>
   </head>
 
-  <body class="min-h-screen bg-bg text-ink antialiased">
+  {/* No bg-* here: see the note in global.css. An opaque body background
+      paints over the z-index -50 rain layer and hides it entirely. */}
+  <body class="min-h-screen text-ink antialiased">
     {/* Digital rain, then CRT glass over it. Both decorative and inert. */}
     <MatrixBackground />
     <div class="crt-overlay crt-scanlines crt-vignette" aria-hidden="true"></div>

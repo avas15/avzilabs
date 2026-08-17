@@ -140,8 +140,14 @@
     scroll-behavior: auto !important;
   }
 
+  /*
+    Body must NOT paint a background. The digital rain sits at z-index -50, and
+    a negative-z-index descendant paints *below* its ancestor's background box.
+    An opaque body background therefore hides it completely. `html` carries the
+    page colour instead, which is also what shows through before the rain loads.
+  */
   body {
-    background-color: var(--bg);
+    background-color: transparent;
     color: var(--text);
     font-family: var(--font-sans);
     font-size: 15px;
