@@ -3,6 +3,15 @@ main = "src/index.ts"
 compatibility_date = "2026-08-01"
 compatibility_flags = ["nodejs_compat"]
 
+# Served on its own subdomain rather than workers.dev. Keeping the game on a
+# separate host from the Pages site means game traffic and the static site
+# never share a request budget.
+workers_dev = false
+
+[[routes]]
+pattern = "play.avzilabs.com"
+custom_domain = true
+
 # Allowed browser origins for the REST endpoints. The WebSocket upgrade is
 # guarded by the room code rather than by origin.
 [vars]
