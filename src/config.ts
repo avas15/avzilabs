@@ -9,8 +9,8 @@ export const SITE = {
   title: 'Avzi Labs',
   tagline: 'Spectrum auctions, games, and tools that should not need an ad-blocker.',
   description:
-    'Avas Saeed builds spectrum-auction platforms, games and small useful tools. Live demos, writing on auction design, and a growing shelf of things worth playing with.',
-  author: 'Avas Saeed',
+    'Avzi builds spectrum-auction platforms, games and small useful tools. Live demos, writing on auction design, and a growing shelf of things worth playing with.',
+  author: 'Avzi',
   locale: 'en_GB',
   lang: 'en-GB',
 } as const;
@@ -36,6 +36,7 @@ export const SOCIAL = {
 
 export const NAV = [
   { label: 'Work', href: '/projects' },
+  { label: 'Stack', href: '/stack' },
   { label: 'Writing', href: '/blog' },
   { label: 'Play', href: '/play' },
   { label: 'Tools', href: '/tools' },
