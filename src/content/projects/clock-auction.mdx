@@ -1,0 +1,111 @@
+---
+title: 'Clock auction simulator'
+summary: 'An ascending clock auction you can step through round by round. Change the activity rule or the increment and watch price discovery, demand reduction and efficiency move against each other.'
+description: 'An interactive ascending clock auction engine implementing eligibility and activity rules, with simulated bidder strategies and an efficiency benchmark.'
+kind: 'data'
+year: 2026
+status: 'live'
+stack: ['TypeScript', 'Vitest', 'SVG']
+order: 3
+links:
+  - label: 'Run the simulator'
+    href: '/demos/clock-auction'
+    primary: true
+  - label: 'Engine source'
+    href: 'https://github.com/avas15/avzilabs/blob/main/src/lib/clock-auction.ts'
+---
+
+A working ascending clock auction, in the same invented slot-allocation domain as the
+[data platform demo](/projects/data-platform-demo). Nothing here derives from client systems.
+
+## Why rebuild rather than sanitise
+
+I have production auction software that I cannot publish. The tempting shortcut is to take it
+and find-and-replace the client's names out.
+
+That is a bad idea, and worth saying why. Redaction by substitution leaves comments, variable
+names, magic numbers, rule thresholds and the shape of the business logic intact. A careful
+reader reconstructs a surprising amount, and you cannot un-publish it once it is out. Rebuilding
+the mechanism from the public literature in a different domain takes less effort than auditing a
+redaction you can never fully trust, and the result demonstrates the same understanding.
+
+## The format
+
+Each product is a block of landing slots at an airport in a time window. The auctioneer posts a
+price per product. Bidders state how many slots they want at that price. Any product with more
+demand than supply gets a price rise; anything already in balance holds. The auction ends when
+nothing is oversubscribed.
+
+Two details matter more than they look:
+
+**Only oversubscribed products rise.** Raising a product that already cleared would break the
+balance it just found. Getting this wrong produces an auction that never terminates.
+
+**Indifference is not a bid.** A bidder demands units worth *strictly* more than the price, not
+weakly more. Treating indifference as demand silently biases the clearing price upward, and it
+is the kind of off-by-one that produces plausible, defensible, wrong numbers.
+
+## The activity rule is the design
+
+Eligibility is measured in points, and bidders must keep using a set share of theirs each round.
+Whatever they do not use, they lose permanently.
+
+That single rule is what turns a clock auction from a price-discovery exercise into a strategic
+one. Without it, bidders sit out the early rounds, let others reveal their valuations, and
+re-enter late. With it, holding back is a commitment you cannot reverse.
+
+The simulator exposes the rule as a slider precisely because the effect is so large. Set it to
+100% and bidders are locked into their opening position. Drop it toward zero and price discovery
+collapses. It is the most instructive control on the page.
+
+## Three bidders behaving differently
+
+- **Straightforward** demands whatever is profitable at the current price. Truthful, and the
+  benchmark the theory is written against.
+- **Demand-reducing** deliberately bids for less than it wants once a product looks contested,
+  to slow the clock. Individually rational, collectively inefficient. This is the central
+  strategic problem of multi-unit auctions and the reason simultaneous formats attract the
+  criticism they do.[^demandreduction]
+- **Budget-capped** wants more than it can pay for, so it drops units by worst surplus per pound
+  until it fits. Budget constraints distort allocation in ways valuations alone do not predict.
+
+The scoreboard reports **revenue and efficiency separately**, because they move independently. A
+design can raise more money while putting slots in the wrong hands, and hiding that behind a
+single headline number is how bad mechanisms get defended.
+
+## Grounding
+
+The simultaneous ascending format and its activity rules come from Milgrom's account of the FCC
+design,[^milgrom] with Cramton's early assessment covering how it behaved once real bidders were
+let near it.[^cramton] The clock variant implemented here, and the reasoning for clock rounds
+ahead of any package stage, follows Ausubel, Cramton and Milgrom.[^clockproxy]
+
+## Engineering notes
+
+The engine is pure. Given a configuration it produces the same auction every time, with a seeded
+PRNG for bidder valuations, and it has no clock, no IO and no browser dependency. The interface
+runs the whole auction up front and then steps through the returned rounds, so the visualisation
+cannot influence the outcome.
+
+27 tests cover the parts that would otherwise fail quietly: that prices rise monotonically, that
+balanced products hold their price, that eligibility is genuinely irreversible, that efficiency
+never exceeds the benchmark, that allocations never exceed supply, and that unsold slots are
+reported rather than hidden.
+
+One test I got wrong first time is worth recording. I asserted that a product with zero supply
+would run to the round cap, expecting it never to clear. It clears instantly and correctly,
+because no bidder can demand a slot that does not exist. The test was wrong, not the engine, and
+the fix was to test the round cap with a genuinely contested product instead.
+
+[^milgrom]: Milgrom, P. (2000). "Putting Auction Theory to Work: The Simultaneous Ascending
+    Auction." *Journal of Political Economy* 108(2), 245-272.
+
+[^cramton]: Cramton, P. (1997). "The FCC Spectrum Auctions: An Early Assessment." *Journal of
+    Economics and Management Strategy* 6(3), 431-495.
+
+[^clockproxy]: Ausubel, L., Cramton, P. and Milgrom, P. (2006). "The Clock-Proxy Auction: A
+    Practical Combinatorial Auction Design." In Cramton, Shoham and Steinberg (eds),
+    *Combinatorial Auctions*, MIT Press.
+
+[^demandreduction]: Ausubel, L. and Cramton, P. (2002). "Demand Reduction and Inefficiency in
+    Multi-Unit Auctions." University of Maryland working paper.

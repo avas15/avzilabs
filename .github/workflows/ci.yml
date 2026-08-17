@@ -40,6 +40,12 @@ jobs:
           cache: npm
 
       - run: npm ci
+
+      # The clock auction engine decides allocations and prices. A silent
+      # regression there produces plausible, defensible, wrong numbers, so the
+      # tests gate the build rather than running separately.
+      - run: npm test
+
       - run: npm run build
 
       # Catches a broken canonical, a missing sitemap entry or an OG image that

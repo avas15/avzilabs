@@ -1,0 +1,62 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+
+const title = 'Clock auction simulator';
+const description =
+  'An interactive ascending clock auction: watch price discovery round by round, see how the activity rule punishes demand reduction, and compare revenue against the efficient allocation.';
+---
+
+<BaseLayout title={title} description={description}>
+  <section class="mx-auto max-w-6xl px-5 pt-28 pb-16 sm:px-8 sm:pt-32">
+    <a href="/projects/clock-auction" class="text-[13px] text-ink-3 hover:text-brand">
+      &lt;&lt; cd ../about-this
+    </a>
+
+    <h1 class="glow mt-4 text-3xl font-800 tracking-tight text-brand sm:text-4xl">
+      ./clock-auction
+    </h1>
+    <p class="mt-3 max-w-3xl text-[14px] leading-relaxed text-ink-2">
+      An ascending clock auction for airport landing slots. Prices rise on any product with more
+      demand than supply; the auction ends when nothing is oversubscribed. Bidders are simulated,
+      so you can rerun it and change the rules.
+    </p>
+
+    <div id="ca" class="mt-8"></div>
+
+    <details class="term term-corners mt-10">
+      <summary class="term-bar cursor-pointer select-none">what to look for</summary>
+      <div class="space-y-3 p-5 text-[13px] leading-relaxed text-ink-2">
+        <p>
+          <span class="text-brand">The activity rule is the whole game.</span> Eligibility is
+          measured in points and you must keep using at least the configured share of it. What
+          you do not use, you lose permanently. Set the rule to 100% and bidders are locked into
+          their opening position. Drop it toward 0% and they can sit back and re-enter late,
+          which destroys price discovery.
+        </p>
+        <p>
+          <span class="text-brand">Demand reduction.</span> Meridian deliberately bids for less
+          than it wants once a product looks contested, to slow the clock. It often pays less per
+          slot. Watch whether it also ends up with fewer slots than it should have, and what that
+          does to the efficiency figure.
+        </p>
+        <p>
+          <span class="text-brand">Increment size trades speed against overshoot.</span> Large
+          steps clear in few rounds but blow past the price where demand actually balanced. That
+          gap is revenue the winners did not need to pay, and it is why real auctions shrink the
+          increment as they converge.
+        </p>
+        <p>
+          <span class="text-brand">Efficiency is not revenue.</span> The two move independently. A
+          design can raise more money while putting slots in the wrong hands, and the scoreboard
+          shows both so the tradeoff is visible rather than assumed.
+        </p>
+      </div>
+    </details>
+  </section>
+</BaseLayout>
+
+<script>
+  import { mountClockAuction } from '@/scripts/clock-auction-ui';
+  const el = document.getElementById('ca');
+  if (el) mountClockAuction(el);
+</script>
