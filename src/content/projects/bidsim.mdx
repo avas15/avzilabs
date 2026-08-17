@@ -1,0 +1,40 @@
+---
+title: 'BidSim'
+summary: 'A live spectrum auction you can run with a room full of people. Teams bid in real time over WebSockets, and the surplus they end up with is the score.'
+description: 'BidSim is a browser-based multi-unit ascending auction simulator used for spectrum auction training. Built with FastAPI and WebSockets.'
+kind: 'game'
+year: 2026
+status: 'in-development'
+genres: ['Simulation', 'Multiplayer', 'Training']
+stack: ['FastAPI', 'WebSockets', 'Python', 'Jinja2']
+order: 2
+---
+
+BidSim is the game I wish I had when I was learning how auctions actually behave.
+
+It is a multi-unit ascending auction, the same family used to sell mobile spectrum. Teams are
+given home bands, marginal valuations per block, per-band caps, deployment costs and a churn
+model. Then the rounds open and they bid against each other in real time.
+
+## Why it works as a teaching tool
+
+Auction theory reads as clean until you sit in a room where four teams are two minutes from a
+round close and someone realises they are one block short of a contiguous holding. The
+interesting behaviour is all in that moment: exposure risk, the temptation to chase a block you
+do not need to deny it to a rival, and the slow realisation that the winner is often whoever
+made the fewest expensive mistakes.
+
+Score is surplus, not spend. Every session someone wins the most spectrum and loses the game.
+
+## How it is built
+
+Deliberately small. FastAPI, Jinja2 templates, WebSockets for the live round state and four
+dependencies in total. One auction lives in memory at a time and every completed run is
+appended to a JSON lines file, which is the entire persistence layer.
+
+That constraint is not laziness. It means the whole thing starts in under a second, runs
+comfortably on the cheapest server available, and there is no database to go wrong halfway
+through a session with twelve people watching.
+
+There are two consoles for whoever is running the session and two team screens, and it supports
+being mounted under a URL prefix so it can sit alongside other apps on one host.

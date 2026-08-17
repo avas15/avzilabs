@@ -1,0 +1,58 @@
+---
+title: 'Auction Platform'
+summary: 'A universal auction engine with an auctioneer console, live bidder screens and a results pipeline. Runs SMRA, clock and combinatorial formats from one configuration.'
+description: 'A TypeScript monorepo implementing a configurable spectrum auction engine, auctioneer control room and bidder interface, with deterministic replay and a results publication pipeline.'
+kind: 'platform'
+year: 2026
+status: 'in-development'
+stack: ['TypeScript', 'Fastify', 'React', 'Prisma', 'Postgres', 'Vitest']
+order: 3
+---
+
+This is the largest thing I have built. It replaced a lineage of PHP tools that had grown one
+auction at a time over several years, each with its own copy of the rules.
+
+## The problem with auction software
+
+Every auction is different, and almost none of the differences are interesting. Activity rules,
+eligibility points, increment schedules, extension triggers, caps and tie-breaks vary between
+sales, but the underlying loop is always the same: open a round, take bids, apply rules, decide
+whether to continue.
+
+The old tools encoded each auction directly. That meant every new sale was a fork, and a rule
+fix never propagated.
+
+## What the engine does instead
+
+One engine, driven by configuration. A nine-section wizard produces a document that fully
+describes an auction, and the engine runs it. SMRA, clock and combinatorial formats are
+variations in that configuration rather than separate code paths.
+
+Two properties made this work:
+
+**Determinism.** The engine is a pure function of configuration, bid history and a seeded
+random source. Given the same three, it produces the same auction. That is what makes rollback
+safe: if a round is voided, the engine replays from the last good state and lands in exactly
+the same place.
+
+**Rules as data.** Activity and eligibility rules are evaluated against the configuration, not
+compiled in. Changing an increment schedule is an edit, not a deployment.
+
+## The control room
+
+The auctioneer console is the part that gets used under pressure. It shows a traffic light grid
+of every team's status, opens and closes rounds, supports bidding on behalf of a team that has
+lost connectivity, handles amendments, and can roll a round back deterministically when
+something goes wrong.
+
+Everything an auctioneer might need at ten seconds to close is on one screen, because that is
+when they need it.
+
+## Engineering
+
+A pnpm workspace with the engine, contracts and valuation logic as pure packages that have no
+knowledge of HTTP or the database. Those packages carry the majority of the test suite, several
+hundred cases covering rule interactions rather than plumbing.
+
+It runs against Postgres in production and boots with an in-memory store for demonstrations,
+which means the whole system can be shown without any infrastructure at all.

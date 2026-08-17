@@ -1,0 +1,138 @@
+---
+import { getCollection, render } from 'astro:content';
+import type { GetStaticPaths } from 'astro';
+import { Icon } from 'astro-icon/components';
+import { Image } from 'astro:assets';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { SITE } from '@/config';
+
+export const getStaticPaths = (async () => {
+  const projects = await getCollection('projects');
+  return projects
+    .filter((p) => import.meta.env.DEV || !p.data.draft)
+    .map((project) => ({ params: { id: project.id }, props: { project } }));
+}) satisfies GetStaticPaths;
+
+const { project } = Astro.props;
+const d = project.data;
+const { Content } = await render(project);
+
+const statusLabel: Record<string, string> = {
+  live: 'Live',
+  'in-development': 'In development',
+  prototype: 'Prototype',
+  archived: 'Archived',
+  'case-study': 'Case study',
+};
+
+// SoftwareApplication markup gives games and tools a shot at a rich result.
+const appSchema = {
+  '@context': 'https://schema.org',
+  '@type': d.kind === 'game' ? 'VideoGame' : 'SoftwareApplication',
+  name: d.title,
+  description: d.summary,
+  applicationCategory: d.kind === 'game' ? 'Game' : 'WebApplication',
+  author: { '@type': 'Person', name: SITE.author },
+  url: new URL(`/projects/${project.id}`, SITE.url).href,
+};
+---
+
+<BaseLayout
+  title={d.title}
+  description={d.description ?? d.summary}
+  ogImage={d.cover?.src}
+  schema={[appSchema]}
+>
+  <article class="mx-auto max-w-7xl px-5 pt-32 sm:px-8 sm:pt-40">
+    <a
+      href="/projects"
+      class="inline-flex items-center gap-1.5 text-sm text-ink-3 transition-colors duration-150 hover:text-brand"
+    >
+      <Icon name="lucide:arrow-right" class="h-3.5 w-3.5 rotate-180" stroke-width={1.75} />
+      All work
+    </a>
+
+    <header class="mt-6 max-w-3xl">
+      <div class="flex flex-wrap items-center gap-2.5 text-[11px] font-500 uppercase tracking-wider">
+        <span class="text-brand">{d.kind}</span>
+        <span class="text-ink-3">/</span>
+        <span class="text-ink-3">{statusLabel[d.status]}</span>
+        <span class="text-ink-3">/</span>
+        <span class="text-ink-3 tnum">{d.year}</span>
+      </div>
+
+      <h1 class="mt-4 text-4xl font-800 tracking-tight text-ink sm:text-5xl">{d.title}</h1>
+      <p class="mt-4 text-lg leading-relaxed text-ink-2">{d.summary}</p>
+
+      {
+        d.links.length > 0 && (
+          <div class="mt-7 flex flex-wrap items-center gap-2.5">
+            {d.links.map((l) => (
+              <a
+                href={l.href}
+                class:list={[
+                  'inline-flex items-center gap-2 rounded-md px-4 py-2.5 text-sm transition-colors duration-150',
+                  l.primary
+                    ? 'bg-brand font-600 text-on-brand hover:bg-brand-hover'
+                    : 'border border-line-strong font-500 text-ink-2 hover:border-brand hover:text-ink',
+                ]}
+              >
+                {l.gated && <Icon name="lucide:lock" class="h-4 w-4" stroke-width={1.75} />}
+                {l.label}
+                <Icon name="lucide:arrow-up-right" class="h-3.5 w-3.5" stroke-width={1.75} />
+              </a>
+            ))}
+          </div>
+        )
+      }
+    </header>
+
+    {
+      d.cover && (
+        <div class="mt-12 overflow-hidden rounded-xl border border-line" data-reveal>
+          <Image
+            src={d.cover}
+            alt={d.coverAlt ?? ''}
+            widths={[800, 1200, 1600]}
+            sizes="(min-width: 1280px) 1200px, 100vw"
+            class="w-full object-cover"
+            loading="eager"
+            fetchpriority="high"
+          />
+        </div>
+      )
+    }
+
+    <div class="mt-12 grid gap-12 lg:grid-cols-[1fr_16rem]">
+      <div class="prose-avzi" data-reveal>
+        <Content />
+      </div>
+
+      <aside class="lg:sticky lg:top-24 lg:self-start" data-reveal data-reveal-delay="80">
+        <div class="rounded-lg border border-line bg-surface p-6">
+          <h2 class="text-xs font-600 uppercase tracking-wider text-ink-3">Stack</h2>
+          <ul class="mt-4 flex flex-wrap gap-1.5">
+            {
+              d.stack.map((s) => (
+                <li class="rounded border border-line px-2 py-1 text-[11px] text-ink-2">{s}</li>
+              ))
+            }
+          </ul>
+
+          {
+            d.genres.length > 0 && (
+              <>
+                <h2 class="mt-6 text-xs font-600 uppercase tracking-wider text-ink-3">Genre</h2>
+                <ul class="mt-4 flex flex-wrap gap-1.5">
+                  {d.genres.map((g) => (
+                    <li class="rounded border border-line px-2 py-1 text-[11px] text-ink-2">{g}</li>
+                  ))}
+                </ul>
+              </>
+            )
+          }
+        </div>
+      </aside>
+    </div>
+  </article>
+</BaseLayout>

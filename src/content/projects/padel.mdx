@@ -1,0 +1,50 @@
+---
+title: 'Padel'
+summary: 'A padel sports game with real shot physics, ragdoll reactions and online multiplayer. Currently in a playable alpha with friends and a long list of things still wrong with the serve.'
+description: 'Padel is a physics-driven sports game in development, built in Unity with Netcode for GameObjects. Read about the shot model, netcode and design process.'
+kind: 'game'
+year: 2026
+status: 'in-development'
+featured: true
+genres: ['Sports', 'Multiplayer', 'Physics']
+stack: ['Unity 6', 'C#', 'Netcode for GameObjects', 'Unity Relay']
+order: 1
+links:
+  - label: 'Watch the alpha'
+    href: '/projects/padel'
+    primary: true
+---
+
+Padel started as a question I could not let go of: why does no game get the ball right?
+
+Padel is a game about walls. The ball comes off the glass, and the whole rally reorganises
+around where it will land. Most sports games treat that as a bounce with a coefficient of
+restitution and move on. It is not. Spin survives the wall, the surface has a grain, and the
+angle you get out is a function of how much the ball was already rotating when it went in.
+
+## The shot model
+
+Every shot is described by contact point, racket face angle, swing path and swing speed. The
+game derives spin and launch from those four rather than choosing a shot type from a menu. That
+means a slice is not a button. It is what happens when the face is open and the path goes down
+across the ball.
+
+The result is a game where two players who both understand padel can have an argument about a
+point, and the game will side with one of them for a reason you can name.
+
+## Netcode
+
+The multiplayer runs on Netcode for GameObjects over Unity Relay, host authoritative. The ball
+is simulated on the host and reconciled on clients, with input prediction on the racket so a
+swing feels immediate at 60 ms of latency.
+
+The honest state of it: rallies hold up well, and the moment where it still breaks is a smash
+returned off the back glass, where the reconciliation window and the wall contact land in the
+same frame. That is the current bug list, in order.
+
+## Where it is going
+
+The alpha runs as a Windows build and I play it with friends most weeks. A browser version is
+planned, starting with a single player practice mode. The multiplayer transport is UDP, which
+browsers do not allow, so the web build needs a WebSocket transport before online play can
+follow it there.

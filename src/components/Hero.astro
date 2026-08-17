@@ -1,0 +1,97 @@
+---
+import { Icon } from 'astro-icon/components';
+
+interface Props {
+  /** Counts shown in the stat strip, computed from the collections. */
+  stats: { label: string; value: string }[];
+}
+
+const { stats } = Astro.props;
+---
+
+<section data-hero class="relative overflow-hidden pt-32 pb-20 sm:pt-40 sm:pb-28">
+  {/*
+    Backdrop is pure CSS. No image request, so the hero cannot hurt LCP -
+    the largest paint here is the headline text, which ships in the HTML.
+  */}
+  <div data-hero-backdrop aria-hidden="true" class="pointer-events-none absolute inset-0 -z-10">
+    <div
+      class="absolute left-1/2 top-[-18rem] h-[38rem] w-[62rem] -translate-x-1/2 rounded-full opacity-[0.16] blur-[120px]"
+      style="background: radial-gradient(closest-side, #FA8334, transparent 72%);"
+    >
+    </div>
+    <div
+      class="absolute right-[-14rem] top-[8rem] h-[30rem] w-[34rem] rounded-full opacity-[0.12] blur-[110px]"
+      style="background: radial-gradient(closest-side, #1B4A75, transparent 72%);"
+    >
+    </div>
+  </div>
+
+  <div class="mx-auto max-w-7xl px-5 sm:px-8">
+    <p
+      data-hero-fade
+      class="flex items-center gap-2.5 text-xs font-600 uppercase tracking-wider text-ink-3"
+    >
+      <span class="inline-block h-1.5 w-1.5 rounded-full bg-brand"></span>
+      Spectrum auctions, games, and small useful software
+    </p>
+
+    <h1 class="mt-7 max-w-4xl text-4xl font-800 leading-[1.05] tracking-tight sm:text-6xl lg:text-7xl">
+      <span data-hero-line class="block text-ink">I build the systems</span>
+      <span data-hero-line class="block text-ink">that decide who wins</span>
+      <span data-hero-line class="block">
+        <span
+          class="bg-gradient-to-r from-pumpkin-300 via-pumpkin-400 to-pumpkin-600 bg-clip-text text-transparent"
+        >
+          the airwaves.
+        </span>
+      </span>
+    </h1>
+
+    <div
+      data-hero-rule
+      aria-hidden="true"
+      class="mt-10 h-px w-full max-w-2xl origin-left bg-gradient-to-r from-pumpkin-500 via-line to-transparent"
+    >
+    </div>
+
+    <p data-hero-fade class="mt-8 max-w-2xl text-lg leading-relaxed text-ink-2">
+      I am Avas Saeed. By day I run spectrum auction strategy and build the platforms that
+      support it. The rest of the time I make games, data tools, and things that should not
+      have needed an ad-blocker to use.
+    </p>
+
+    <div data-hero-fade class="mt-9 flex flex-wrap items-center gap-3">
+      <a
+        href="/projects"
+        class="inline-flex items-center gap-2 rounded-md bg-brand px-5 py-3 text-sm font-600 text-on-brand transition-colors duration-150 hover:bg-brand-hover"
+      >
+        See the work
+        <Icon name="lucide:arrow-right" class="h-4 w-4" stroke-width={1.75} />
+      </a>
+      <a
+        href="/play"
+        class="inline-flex items-center gap-2 rounded-md border border-line-strong px-5 py-3 text-sm font-500 text-ink-2 transition-colors duration-150 hover:border-brand hover:text-ink"
+      >
+        <Icon name="lucide:play" class="h-4 w-4" stroke-width={1.75} />
+        Play something
+      </a>
+    </div>
+
+    {
+      stats.length > 0 && (
+        <dl
+          data-hero-fade
+          class="mt-16 grid max-w-2xl grid-cols-2 gap-px overflow-hidden rounded-lg border border-line bg-line sm:grid-cols-4"
+        >
+          {stats.map((s) => (
+            <div class="bg-bg px-4 py-4">
+              <dd class="text-2xl font-700 tracking-tight text-ink tnum">{s.value}</dd>
+              <dt class="mt-1 text-xs text-ink-3">{s.label}</dt>
+            </div>
+          ))}
+        </dl>
+      )
+    }
+  </div>
+</section>

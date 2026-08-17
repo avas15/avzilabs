@@ -1,0 +1,160 @@
+---
+import { getCollection } from 'astro:content';
+import { Icon } from 'astro-icon/components';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Hero from '@/components/Hero.astro';
+import FeaturedCard from '@/components/FeaturedCard.astro';
+import ProjectCard from '@/components/ProjectCard.astro';
+import { SITE } from '@/config';
+
+const isPublished = <T extends { data: { draft: boolean } }>(e: T) =>
+  import.meta.env.DEV || !e.data.draft;
+
+const allProjects = (await getCollection('projects')).filter(isPublished);
+const posts = (await getCollection('blog'))
+  .filter(isPublished)
+  .sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime());
+
+const featured = allProjects.find((p) => p.data.featured);
+const grid = allProjects
+  .filter((p) => p.id !== featured?.id)
+  .sort((a, b) => a.data.order - b.data.order || b.data.year - a.data.year)
+  .slice(0, 6);
+
+const stats = [
+  { label: 'Projects shipped', value: String(allProjects.length) },
+  { label: 'Live demos', value: String(allProjects.filter((p) => p.data.status === 'live').length) },
+  { label: 'Posts written', value: String(posts.length) },
+  { label: 'Years in spectrum', value: '5' },
+];
+
+const websiteSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: SITE.name,
+  url: SITE.url,
+  description: SITE.description,
+};
+---
+
+<BaseLayout schema={[websiteSchema]}>
+  <Hero stats={stats} />
+
+  {featured && <FeaturedCard project={featured} />}
+
+  {/* Selected work */}
+  {
+    grid.length > 0 && (
+      <section aria-labelledby="work-heading" class="mx-auto max-w-7xl px-5 pt-24 sm:px-8">
+        <div class="mb-8 flex items-end justify-between gap-6" data-reveal>
+          <div>
+            <h2 id="work-heading" class="text-2xl font-700 tracking-tight text-ink sm:text-3xl">
+              Selected work
+            </h2>
+            <p class="mt-2 max-w-xl text-[15px] text-ink-2">
+              Auction platforms, games, and the occasional tool built because the alternative
+              wanted my email address.
+            </p>
+          </div>
+          <a
+            href="/projects"
+            class="hidden shrink-0 items-center gap-1.5 text-sm font-500 text-brand transition-colors duration-150 hover:text-brand-hover sm:inline-flex"
+          >
+            All work
+            <Icon name="lucide:arrow-right" class="h-4 w-4" stroke-width={1.75} />
+          </a>
+        </div>
+
+        <div
+          data-reveal-group
+          class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3"
+        >
+          {grid.map((p, i) => (
+            <ProjectCard project={p} eager={i < 3} />
+          ))}
+        </div>
+      </section>
+    )
+  }
+
+  {/* Latest writing */}
+  {
+    posts.length > 0 && (
+      <section aria-labelledby="writing-heading" class="mx-auto max-w-7xl px-5 pt-24 sm:px-8">
+        <div class="mb-8 flex items-end justify-between gap-6" data-reveal>
+          <h2 id="writing-heading" class="text-2xl font-700 tracking-tight text-ink sm:text-3xl">
+            Writing
+          </h2>
+          <a
+            href="/blog"
+            class="inline-flex shrink-0 items-center gap-1.5 text-sm font-500 text-brand transition-colors duration-150 hover:text-brand-hover"
+          >
+            All posts
+            <Icon name="lucide:arrow-right" class="h-4 w-4" stroke-width={1.75} />
+          </a>
+        </div>
+
+        <ul data-reveal-group class="divide-y divide-line border-y border-line">
+          {posts.slice(0, 4).map((post) => (
+            <li data-reveal-item>
+              <a
+                href={`/blog/${post.id}`}
+                class="group flex flex-col gap-2 py-5 transition-colors duration-150 sm:flex-row sm:items-baseline sm:gap-8"
+              >
+                <time
+                  datetime={post.data.pubDate.toISOString()}
+                  class="shrink-0 text-sm text-ink-3 tnum sm:w-28"
+                >
+                  {post.data.pubDate.toLocaleDateString('en-GB', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: '2-digit',
+                  })}
+                </time>
+                <div class="min-w-0 flex-1">
+                  <h3 class="text-[17px] font-600 text-ink transition-colors duration-150 group-hover:text-brand">
+                    {post.data.title}
+                  </h3>
+                  <p class="mt-1 text-sm leading-relaxed text-ink-2">{post.data.description}</p>
+                </div>
+                <Icon
+                  name="lucide:arrow-right"
+                  class="hidden h-4 w-4 shrink-0 self-center text-ink-3 transition-transform duration-150 group-hover:translate-x-1 group-hover:text-brand sm:block"
+                  stroke-width={1.75}
+                />
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )
+  }
+
+  {/* Closing call to action */}
+  <section class="mx-auto max-w-7xl px-5 pt-24 sm:px-8">
+    <div
+      class="relative overflow-hidden rounded-xl border border-line bg-surface p-8 sm:p-12"
+      data-reveal
+    >
+      <div
+        aria-hidden="true"
+        class="hero-gradient pointer-events-none absolute inset-x-0 top-0 h-px opacity-90"
+      >
+      </div>
+      <h2 class="max-w-lg text-2xl font-700 tracking-tight text-ink sm:text-3xl">
+        Building something in auctions, games, or data?
+      </h2>
+      <p class="mt-3 max-w-xl text-[15px] leading-relaxed text-ink-2">
+        I am usually up for a conversation about auction design, multiplayer netcode, or why
+        your spectrum benchmark is off by a factor of population.
+      </p>
+      <a
+        href="mailto:avas.saeed@gmail.com"
+        class="mt-7 inline-flex items-center gap-2 rounded-md bg-brand px-5 py-3 text-sm font-600 text-on-brand transition-colors duration-150 hover:bg-brand-hover"
+      >
+        <Icon name="lucide:mail" class="h-4 w-4" stroke-width={1.75} />
+        Get in touch
+      </a>
+    </div>
+  </section>
+</BaseLayout>

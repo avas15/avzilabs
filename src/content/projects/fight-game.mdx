@@ -1,0 +1,48 @@
+---
+title: 'Fight Game'
+summary: 'A wrestling and MMA hybrid, and more interestingly, the Unity editor tooling that builds it. Batch animation retargeting, automated animator construction and a networked arena generator.'
+description: 'A Unity fighting game prototype whose real output is editor tooling: batch generic-to-humanoid animation conversion, animator controller generation and networked arena scene building.'
+kind: 'game'
+year: 2026
+status: 'prototype'
+genres: ['Fighting', 'Multiplayer']
+stack: ['Unity 6', 'C#', 'URP', 'Unity Relay']
+order: 6
+---
+
+The game is a wrestling and MMA hybrid. The part worth showing is the toolchain underneath it.
+
+## The problem
+
+The project draws on several large animation libraries, in the region of two hundred clips,
+almost all authored as generic rather than humanoid rigs. Converting those by hand, wiring them
+into animator controllers and keeping them consistent is weeks of work that produces nothing
+anyone can see.
+
+So I stopped doing it by hand.
+
+## The tools
+
+A set of editor windows under a single menu:
+
+A **rig state reporter** that scans every clip and reports what rig it is on, what is broken and
+what will not retarget, before any conversion is attempted.
+
+A **batch converter** that takes generic clips to humanoid in bulk, roughly two hundred at a
+time, with an avatar definition applied consistently rather than per-import.
+
+An **animator builder** that constructs controllers, states and transitions from a definition
+rather than by dragging nodes, which means a fighter archetype is a file and not an afternoon.
+
+A **sandbox scene builder** and an **archetype builder** that assemble a testable character in
+one action.
+
+A **networked arena builder** that generates a five player host-authoritative arena over Unity
+Relay, so netcode changes can be tested without hand-building a scene each time.
+
+## Why this is the interesting half
+
+A fighting game lives or dies on how quickly you can iterate on feel. Every hour spent on
+retargeting is an hour not spent on hit reactions. The tooling turned a change that used to cost
+a day into one that costs a few minutes, and that is the actual reason the prototype exists at
+all.

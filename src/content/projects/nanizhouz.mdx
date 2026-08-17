@@ -1,0 +1,47 @@
+---
+title: 'NANIZHOUZ'
+summary: 'A first person horror game about a house that does not want you to leave. Zombie AI with real sensory systems, limb damage, a vendor economy and a chainsaw boss who is genuinely a problem.'
+description: 'NANIZHOUZ is a first-person survival horror game built in Unity 6 with URP, featuring sensory-driven enemy AI, dismemberment, puzzle systems and a full launch plan.'
+kind: 'game'
+year: 2026
+status: 'case-study'
+genres: ['Horror', 'Survival', 'Single player']
+stack: ['Unity 6', 'C#', 'URP', 'FMOD']
+order: 5
+---
+
+NANIZHOUZ is the biggest game project I have taken on, and the one that taught me most about
+scope.
+
+## The enemies
+
+The zombies are built around senses rather than states. Each has sight with a real cone and
+occlusion, hearing with falloff, and a memory of where it last believed you were. It does not
+know where you are. It knows where it thinks you are, and it goes there.
+
+That single design choice produces most of the good moments. Throwing something to move a
+zombie's belief works because belief is a thing the system actually models. Hiding works because
+the enemy commits to a stale hypothesis for a while before giving up.
+
+Limb damage is per-part with dismemberment, which changes behaviour rather than just visuals. A
+zombie missing a leg is slower and still coming.
+
+## The house
+
+Puzzles are physical rather than inventory-based: a television, a dollhouse that mirrors the
+building, a boiler that has to be brought back up. There is a vendor with an upgrade economy, a
+throwable system with fire that propagates across surfaces, and a darts minigame that exists
+purely because the room needed something to do in it.
+
+The chainsaw boss remains the hardest thing in the game to balance. Every time I make him fair
+he stops being frightening.
+
+## What I learned
+
+The project has a full design document, a marketing plan and a launch checklist, and writing
+those was more useful than any of the code. Roughly four hundred gigabytes of assets is a
+decision that constrains everything downstream, and I would make a different one now.
+
+It is presented here as a case study with footage rather than a playable build. Streaming that
+asset volume to a browser is not a realistic proposition, and pretending otherwise would waste
+your time and mine.

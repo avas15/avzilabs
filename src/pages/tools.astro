@@ -1,0 +1,81 @@
+---
+import { Icon } from 'astro-icon/components';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+
+/*
+  Each tool gets its own indexable page on the apex once built. The work runs
+  on api.avzilabs.com; private tools sit behind Cloudflare Access on my.
+*/
+const tools = [
+  {
+    title: 'PDF toolkit',
+    blurb: 'Merge, split, rotate, compress and convert. Files are processed and then deleted.',
+    access: 'public' as const,
+    status: 'building' as const,
+  },
+  {
+    title: 'Image converter',
+    blurb: 'Batch convert and resize between PNG, JPEG, WebP and AVIF without an upload queue.',
+    access: 'public' as const,
+    status: 'building' as const,
+  },
+  {
+    title: 'Document converter',
+    blurb: 'Office documents, markdown and HTML in and out, with the formatting mostly intact.',
+    access: 'public' as const,
+    status: 'building' as const,
+  },
+  {
+    title: 'Media converter',
+    blurb:
+      'Audio and video transcoding driven by ffmpeg. Runs on a worker rather than a rented server, so it is invite only.',
+    access: 'private' as const,
+    status: 'building' as const,
+  },
+];
+
+const accessLabel = { public: 'Open to all', private: 'Invite only' };
+---
+
+<BaseLayout
+  title="Tools"
+  description="Small, fast file and media utilities without advertising, sign-up walls or rate limits. Built because the alternatives were unusable."
+>
+  <section class="mx-auto max-w-4xl px-5 pt-32 sm:px-8 sm:pt-40">
+    <h1 class="text-4xl font-800 tracking-tight text-ink sm:text-5xl" data-reveal>Tools</h1>
+    <p class="mt-4 max-w-2xl text-lg leading-relaxed text-ink-2" data-reveal data-reveal-delay="60">
+      Utilities I got tired of hunting for. No advertising, no watermarks, no forced sign-up, and
+      uploads are deleted once the job finishes. A few of them are invite only, because they run
+      on hardware I pay for.
+    </p>
+
+    <ul data-reveal-group class="mt-14 grid gap-4 sm:grid-cols-2">
+      {
+        tools.map((t) => (
+          <li
+            data-reveal-item
+            class="flex flex-col rounded-lg border border-line bg-surface p-6 transition-colors duration-200 hover:border-line-strong"
+          >
+            <div class="flex items-center gap-2">
+              <Icon name="lucide:wrench" class="h-3.5 w-3.5 text-ink-3" stroke-width={1.5} />
+              <span class="text-[11px] font-500 uppercase tracking-wider text-ink-3">
+                {accessLabel[t.access]}
+              </span>
+              {t.access === 'private' && (
+                <Icon name="lucide:lock" class="h-3 w-3 text-ink-3" stroke-width={1.75} />
+              )}
+              <span class="ml-auto text-[11px] font-500 text-warn">In development</span>
+            </div>
+
+            <h2 class="mt-3 text-lg font-600 tracking-tight text-ink">{t.title}</h2>
+            <p class="mt-2 text-sm leading-relaxed text-ink-2">{t.blurb}</p>
+          </li>
+        ))
+      }
+    </ul>
+
+    <p class="mt-10 text-sm text-ink-3" data-reveal>
+      Want access to the invite-only tools? Send me a note and I will add your email.
+    </p>
+  </section>
+</BaseLayout>

@@ -1,0 +1,38 @@
+# build output
+dist/
+.astro/
+.output/
+
+# dependencies
+node_modules/
+.pnpm-store/
+
+# logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# environment - never commit these, the repo is public
+.env
+.env.*
+!.env.example
+
+# secrets and keys
+*.pem
+*.key
+*.p12
+*.pfx
+secrets/
+*.tfvars
+
+# editor / os
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# large media belongs on R2, not in git
+public/media/**/*.mp4
+public/media/**/*.webm
+public/media/**/*.mov

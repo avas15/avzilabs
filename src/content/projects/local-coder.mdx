@@ -1,0 +1,39 @@
+---
+title: 'Local Coder'
+summary: 'A desktop coding agent that runs entirely against local models. No API keys, no per-token bill, no code leaving the machine.'
+description: 'Local Coder is an Electron desktop application providing an AI coding agent backed by locally hosted language models via LM Studio.'
+kind: 'tool'
+year: 2026
+status: 'prototype'
+stack: ['Electron', 'Node.js', 'Express', 'LM Studio']
+order: 7
+---
+
+Local Coder is a desktop coding agent that talks to models running on your own hardware.
+
+## Why build it
+
+Two reasons, and only one of them is cost.
+
+The obvious one is that a coding agent billed per token gets expensive on long sessions. The
+better one is that some code should not leave the machine it lives on. If the model is local,
+that question does not arise, and you do not have to trust a policy document about it.
+
+## How it works
+
+An Electron shell around a local server that speaks to LM Studio, with the agent loop, tool
+calling and file editing handled locally. It ships as a portable executable, so there is no
+install step and nothing to uninstall.
+
+Alongside the core agent it grew a few things I needed: an image generation integration, model
+and adapter fetching, batch generation scripts, a model-swapping configuration generator, and a
+mobile mode for driving it from a phone on the same network.
+
+## The honest assessment
+
+A locally hosted model on consumer hardware is not competitive with a frontier model on hard
+reasoning. It is genuinely good at the bulk of day-to-day work: mechanical refactors, writing
+tests, moving code between files, explaining an unfamiliar function.
+
+The value is knowing where the line is and routing work accordingly, rather than pretending the
+local model is something it is not.

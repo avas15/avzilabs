@@ -1,0 +1,49 @@
+---
+title: 'GSO IQ'
+summary: 'A spectrum intelligence platform: licence and award records across countries, band plan browsing, benchmark analytics and a natural language query layer over the whole dataset.'
+description: 'GSO IQ is a spectrum licence and auction intelligence web application with band plan visualisation, benchmarking analytics and a natural-language-to-SQL query engine.'
+kind: 'data'
+year: 2026
+status: 'in-development'
+stack: ['FastAPI', 'SQLModel', 'HTMX', 'Chart.js', 'SQLite']
+order: 4
+---
+
+Spectrum data is public, scattered, and inconsistent in every dimension that matters. Regulators
+publish awards in different units, different currencies, over different licence terms, with
+population figures from different years. Comparing two countries honestly takes an afternoon.
+
+GSO IQ is the tool that makes it take a minute.
+
+## What it holds
+
+Licence and award records across countries and bands, normalised so that they can actually be
+compared: prices converted to a common basis, licence durations annualised, and population
+adjustments applied consistently rather than per analyst.
+
+On top of that sit a band plan browser that shows who holds what across a country's spectrum,
+country detail pages, and benchmarking views that place one award against a peer group.
+
+## The query layer
+
+The part I am most pleased with is the natural language interface. A question in plain English
+is parsed into an intent, turned into a query against the schema, executed, and returned with a
+chart chosen to suit the shape of the answer.
+
+The interesting engineering is not the generation, it is the evaluation. There is a harness that
+generates questions, runs them, and scores the answers with a model acting as judge, so that a
+change to the query builder can be measured rather than argued about. Without that, a
+natural-language layer is a demo. With it, it is a feature.
+
+## Interface
+
+Server-rendered HTML with HTMX for the interactive parts. No build step, no client-side
+framework, no hydration. Tables expand, charts redraw and filters apply without a full page
+load, and the whole thing degrades to working plain HTML.
+
+For a data tool used by analysts on corporate laptops, that trade has been consistently correct.
+
+## Note on data
+
+The public demonstration runs on a sanitised, read-only dataset built from openly published
+regulator sources. Licensed third party data and internal analysis are not included.

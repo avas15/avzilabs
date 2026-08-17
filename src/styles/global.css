@@ -1,0 +1,334 @@
+@import 'tailwindcss';
+@import '@fontsource-variable/inter';
+
+/*
+  Design system ported from the auction platform's STYLE_TOKENS.md.
+  Palette values are copied exactly. Do not invent new colours here.
+*/
+
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
+
+@theme {
+  --color-pumpkin-50: #fff5ec;
+  --color-pumpkin-100: #ffe6d0;
+  --color-pumpkin-200: #fcc99d;
+  --color-pumpkin-300: #faab6b;
+  --color-pumpkin-400: #fa8334;
+  --color-pumpkin-500: #e5732b;
+  --color-pumpkin-600: #c45f20;
+  --color-pumpkin-700: #9a4a18;
+  --color-pumpkin-800: #703510;
+  --color-pumpkin-900: #4a230a;
+
+  --color-prussian-50: #e8edf4;
+  --color-prussian-100: #c5d1e0;
+  --color-prussian-200: #8ba3bf;
+  --color-prussian-300: #5175a0;
+  --color-prussian-400: #1b4a75;
+  --color-prussian-500: #0a3058;
+  --color-prussian-600: #031d44;
+  --color-prussian-700: #021736;
+  --color-prussian-800: #011028;
+  --color-prussian-900: #010a1a;
+
+  --color-deepspace-50: #e9f1f7;
+  --color-deepspace-100: #c8dceb;
+  --color-deepspace-200: #7badc9;
+  --color-deepspace-300: #3a8ab8;
+  --color-deepspace-400: #1a6a95;
+  --color-deepspace-500: #04395e;
+  --color-deepspace-600: #032d4b;
+  --color-deepspace-700: #022138;
+  --color-deepspace-800: #011525;
+  --color-deepspace-900: #010a14;
+
+  --color-berry-50: #f8edf2;
+  --color-berry-100: #f0d4e2;
+  --color-berry-200: #d89ab5;
+  --color-berry-300: #c06a93;
+  --color-berry-400: #9e4770;
+  --color-berry-500: #833b5d;
+  --color-berry-600: #682f4a;
+  --color-berry-700: #4d2337;
+  --color-berry-800: #321724;
+  --color-berry-900: #1f0e16;
+
+  --font-sans: 'Inter Variable', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono: ui-monospace, 'SF Mono', 'Cascadia Mono', 'Roboto Mono', monospace;
+
+  /* Motion. Easing and durations per STYLE_TOKENS.md. */
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/*
+  Semantic tokens. Dark is the default look for this site: it suits the games
+  and portfolio material, and matches the storefront reference. Light is a
+  supported alternative rather than an afterthought.
+*/
+:root,
+[data-theme='dark'] {
+  --bg: var(--color-deepspace-900);
+  --bg-subtle: #010f1c;
+  --surface: var(--color-deepspace-800);
+  --surface-raised: var(--color-deepspace-700);
+  --border: color-mix(in oklab, var(--color-deepspace-400) 22%, transparent);
+  --border-strong: color-mix(in oklab, var(--color-deepspace-300) 34%, transparent);
+  --text: #ffffff;
+  --text-2: var(--color-gray-300);
+  --text-3: #8fa3b5;
+  --brand: var(--color-pumpkin-400);
+  --brand-hover: var(--color-pumpkin-300);
+  --on-brand: #241004;
+  --info: var(--color-prussian-200);
+  --ok: var(--color-deepspace-200);
+  --warn: var(--color-pumpkin-300);
+  --danger: var(--color-berry-300);
+}
+
+[data-theme='light'] {
+  --bg: var(--color-gray-50);
+  --bg-subtle: #ffffff;
+  --surface: #ffffff;
+  --surface-raised: #ffffff;
+  --border: var(--color-gray-200);
+  --border-strong: var(--color-gray-300);
+  --text: var(--color-gray-800);
+  --text-2: var(--color-gray-600);
+  --text-3: var(--color-gray-400);
+  --brand: var(--color-pumpkin-600);
+  --brand-hover: var(--color-pumpkin-500);
+  --on-brand: #ffffff;
+  --info: var(--color-prussian-500);
+  --ok: var(--color-deepspace-500);
+  --warn: var(--color-pumpkin-600);
+  --danger: var(--color-berry-500);
+}
+
+/* `inline` so the utilities resolve the var at use time and theming works. */
+@theme inline {
+  --color-bg: var(--bg);
+  --color-bg-subtle: var(--bg-subtle);
+  --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
+  --color-line: var(--border);
+  --color-line-strong: var(--border-strong);
+  --color-ink: var(--text);
+  --color-ink-2: var(--text-2);
+  --color-ink-3: var(--text-3);
+  --color-brand: var(--brand);
+  --color-brand-hover: var(--brand-hover);
+  --color-on-brand: var(--on-brand);
+  --color-info: var(--info);
+  --color-ok: var(--ok);
+  --color-warn: var(--warn);
+  --color-danger: var(--danger);
+}
+
+@layer base {
+  html {
+    background-color: var(--bg);
+    color-scheme: dark;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  html[data-theme='light'] {
+    color-scheme: light;
+  }
+
+  /*
+    Lenis drives scroll on the marketing pages. It needs native smooth scroll
+    off, otherwise the two fight and produce a rubber-band feel.
+  */
+  html.lenis,
+  html.lenis body {
+    height: auto;
+  }
+  .lenis.lenis-smooth {
+    scroll-behavior: auto !important;
+  }
+
+  body {
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: var(--font-sans);
+    font-synthesis-weight: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    font-feature-settings: 'cv02' 1, 'cv03' 1, 'cv04' 1, 'cv11' 1;
+    overflow-x: hidden;
+  }
+
+  /* Tabular numerics everywhere a figure appears. */
+  .tnum,
+  th,
+  td,
+  time,
+  data {
+    font-feature-settings: 'tnum' 1, 'cv02' 1, 'cv03' 1, 'cv04' 1, 'cv11' 1;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    text-wrap: balance;
+    letter-spacing: -0.02em;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-pumpkin-300);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
+  ::selection {
+    background: var(--color-pumpkin-400);
+    color: #240f04;
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--bg);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--border-strong);
+    border-radius: 6px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-pumpkin-600);
+  }
+}
+
+@layer components {
+  /*
+    Scroll reveal. Elements start hidden and are revealed by GSAP.
+    Critically, `.no-motion` (set when the user prefers reduced motion, or
+    before the motion script loads) forces everything visible, so content is
+    never gated behind JavaScript. This matters for both accessibility and
+    for crawlers.
+  */
+  [data-reveal] {
+    opacity: 0;
+    transform: translate3d(0, 18px, 0);
+    will-change: opacity, transform;
+  }
+
+  .no-motion [data-reveal],
+  [data-reveal].is-revealed {
+    opacity: 1;
+    transform: none;
+  }
+
+  .no-motion [data-reveal] {
+    transition: none !important;
+  }
+
+  .hero-gradient {
+    /* Exact hero gradient from STYLE_TOKENS.md. */
+    background-image: linear-gradient(135deg, #9a4a18 0%, #c45f20 40%, #703510 100%);
+  }
+
+  .rule {
+    border-color: var(--border);
+  }
+
+  .prose-avzi {
+    --tw-prose-body: var(--text-2);
+    max-width: 68ch;
+  }
+  .prose-avzi h2 {
+    margin-top: 2.5rem;
+    margin-bottom: 0.75rem;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .prose-avzi h3 {
+    margin-top: 2rem;
+    margin-bottom: 0.5rem;
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .prose-avzi p,
+  .prose-avzi ul,
+  .prose-avzi ol {
+    margin-bottom: 1.15rem;
+    line-height: 1.75;
+    color: var(--text-2);
+  }
+  .prose-avzi ul {
+    list-style: disc;
+    padding-left: 1.35rem;
+  }
+  .prose-avzi ol {
+    list-style: decimal;
+    padding-left: 1.35rem;
+  }
+  .prose-avzi li {
+    margin-bottom: 0.4rem;
+  }
+  .prose-avzi a {
+    color: var(--brand);
+    text-underline-offset: 3px;
+    text-decoration: underline;
+  }
+  .prose-avzi a:hover {
+    color: var(--brand-hover);
+  }
+  .prose-avzi code {
+    background: var(--surface-raised);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0.1rem 0.35rem;
+    font-family: var(--font-mono);
+    font-size: 0.875em;
+    color: var(--text);
+  }
+  .prose-avzi pre {
+    background: var(--surface-raised);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem;
+    overflow-x: auto;
+    margin-bottom: 1.15rem;
+  }
+  .prose-avzi pre code {
+    background: none;
+    border: 0;
+    padding: 0;
+  }
+  .prose-avzi blockquote {
+    border-left: 2px solid var(--brand);
+    padding-left: 1rem;
+    color: var(--text-3);
+    margin-bottom: 1.15rem;
+  }
+}
+
+/*
+  Accessibility guardrail. Honoured regardless of the site's motion ambitions.
+*/
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  [data-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}

@@ -1,0 +1,79 @@
+---
+title: 'A personal platform for under ten euros a month'
+description: 'Portfolio, blog, multiplayer games, live demos and private tools, on infrastructure that cannot surprise me with a bill. The architecture, and the two decisions that made it work.'
+pubDate: 2026-08-17
+tags: ['infrastructure', 'cost']
+---
+
+I wanted one place to put everything: portfolio, writing, a few live application demos,
+multiplayer games to play with friends, and a set of private file tools. The constraint was that
+the whole thing had to cost less than a takeaway per month, and that a traffic spike on a game
+must not be able to take down the blog.
+
+Those two requirements pull in opposite directions, and resolving them turned out to be almost
+the entire design.
+
+## The metered billing problem
+
+The obvious route is a small cloud instance. The catch is not the instance price, it is egress.
+Bandwidth on the major clouds is billed per gigabyte, and a browser game or a WebGL build is
+tens of megabytes per visitor.
+
+That is fine until it is not. The failure mode of metered egress is silent: nothing breaks, no
+alert fires, and the consequence arrives four weeks later as a number. For a personal project
+where I am the only person who cares, that risk is not worth carrying.
+
+A fixed-price server removes the entire category. It cannot bill me more than it bills me. That
+one property was worth more than every managed service I gave up.
+
+## Isolation you cannot buy with tuning
+
+The second requirement was harder. If the games and the blog share a machine, then a busy game
+degrades the blog. You can mitigate that with resource limits, and you should, but limits only
+go so far.
+
+Container memory limits are genuinely reliable. CPU weighting works well. But a single machine
+has one network interface, and if something saturates it, everything on that machine is slow.
+There is no cgroup for that.
+
+So I stopped trying to solve it on the machine.
+
+The public site is entirely static and served from a CDN. It is not on the server at all. The
+games and tools cannot degrade it, because they are not in the same building, let alone the
+same box. The isolation requirement is met by architecture rather than configuration, and it
+costs nothing.
+
+## The shape it settled into
+
+The static site carries the blog, the portfolio, and the landing pages for every game and tool.
+Those are the pages that need to be fast and indexed, and they are the ones that will get
+traffic if anything ever does well.
+
+A single small server runs the things that genuinely need a server: WebSocket game sessions, the
+job queue for file conversion, and the live application demos. Each service is capped so no one
+of them can starve the others, and everything reaches the internet through an outbound tunnel,
+which means the machine has no open inbound ports at all. Not even for administration.
+
+Anything large that needs storing goes to object storage where egress is free, so the server's
+own bandwidth allowance is only ever spent on WebSocket frames and JSON.
+
+## Two things worth stealing
+
+**Put every static byte somewhere else.** Not for performance, although it helps. Because it
+turns your server's bandwidth budget into something you will never plausibly reach, and it
+removes the failure mode where a popular download slows down everything you host.
+
+**Prefer fixed prices to elastic ones when nobody is paying you.** Elastic pricing is correct
+when revenue scales with usage. On a personal project, usage scaling is a liability with no
+matching upside, and a hard ceiling is a feature rather than a compromise.
+
+## On running the media tools locally
+
+One deliberate oddity. The heavier media conversion does not run on the server. It runs on a
+machine at home that pulls jobs over an outbound connection, and the interface simply shows the
+worker as offline when that machine is switched off.
+
+Partly this is about cost, since transcoding is the one workload that could genuinely exhaust a
+small server. Mostly it is that jobs which depend on a residential network connection behave
+very differently from a datacenter one, and the honest engineering answer was to run them where
+they work rather than where it was tidy.

@@ -1,0 +1,103 @@
+---
+import { getCollection, render } from 'astro:content';
+import type { GetStaticPaths } from 'astro';
+import { Icon } from 'astro-icon/components';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { SITE } from '@/config';
+
+export const getStaticPaths = (async () => {
+  const posts = await getCollection('blog');
+  return posts
+    .filter((p) => import.meta.env.DEV || !p.data.draft)
+    .map((post) => ({ params: { id: post.id }, props: { post } }));
+}) satisfies GetStaticPaths;
+
+const { post } = Astro.props;
+const d = post.data;
+const { Content, headings } = await render(post);
+
+const articleSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'BlogPosting',
+  headline: d.title,
+  description: d.description,
+  datePublished: d.pubDate.toISOString(),
+  dateModified: (d.updatedDate ?? d.pubDate).toISOString(),
+  author: { '@type': 'Person', name: SITE.author, url: SITE.url },
+  publisher: { '@type': 'Person', name: SITE.author },
+  mainEntityOfPage: new URL(`/blog/${post.id}`, SITE.url).href,
+  keywords: d.tags.join(', '),
+};
+
+const toc = headings.filter((h) => h.depth === 2);
+---
+
+<BaseLayout
+  title={d.title}
+  description={d.description}
+  ogType="article"
+  ogImage={d.cover?.src}
+  publishedTime={d.pubDate}
+  modifiedTime={d.updatedDate}
+  schema={[articleSchema]}
+>
+  <article class="mx-auto max-w-4xl px-5 pt-32 sm:px-8 sm:pt-40">
+    <a
+      href="/blog"
+      class="inline-flex items-center gap-1.5 text-sm text-ink-3 transition-colors duration-150 hover:text-brand"
+    >
+      <Icon name="lucide:arrow-right" class="h-3.5 w-3.5 rotate-180" stroke-width={1.75} />
+      All posts
+    </a>
+
+    <header class="mt-6">
+      <div class="flex flex-wrap items-center gap-3">
+        <time datetime={d.pubDate.toISOString()} class="text-sm text-ink-3 tnum">
+          {
+            d.pubDate.toLocaleDateString('en-GB', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+            })
+          }
+        </time>
+        {
+          d.tags.map((t) => (
+            <span class="rounded border border-line px-1.5 py-0.5 text-[11px] text-ink-3">{t}</span>
+          ))
+        }
+      </div>
+
+      <h1 class="mt-4 text-4xl font-800 leading-tight tracking-tight text-ink sm:text-5xl">
+        {d.title}
+      </h1>
+      <p class="mt-4 text-lg leading-relaxed text-ink-2">{d.description}</p>
+    </header>
+
+    <div class="mt-12 grid gap-12 lg:grid-cols-[1fr_14rem]">
+      <div class="prose-avzi min-w-0">
+        <Content />
+      </div>
+
+      {
+        toc.length > 1 && (
+          <aside class="order-first lg:order-last lg:sticky lg:top-24 lg:self-start">
+            <h2 class="text-xs font-600 uppercase tracking-wider text-ink-3">On this page</h2>
+            <ul class="mt-4 space-y-2 border-l border-line">
+              {toc.map((h) => (
+                <li>
+                  <a
+                    href={`#${h.slug}`}
+                    class="-ml-px block border-l border-transparent pl-3 text-sm text-ink-3 transition-colors duration-150 hover:border-brand hover:text-brand"
+                  >
+                    {h.text}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </aside>
+        )
+      }
+    </div>
+  </article>
+</BaseLayout>

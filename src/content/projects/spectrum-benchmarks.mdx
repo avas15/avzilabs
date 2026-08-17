@@ -1,0 +1,53 @@
+---
+title: 'Spectrum benchmark pipeline'
+summary: 'A reproducible pipeline that turns messy regulator data into comparable international price benchmarks, and then into finished reports without anyone touching a spreadsheet.'
+description: 'A Python and Node pipeline for normalising international spectrum licence pricing data and generating reproducible benchmark reports and charts.'
+kind: 'data'
+year: 2026
+status: 'case-study'
+stack: ['Python', 'pandas', 'openpyxl', 'Node.js', 'docx']
+order: 8
+---
+
+Spectrum price benchmarking is a genre of analysis that is done badly almost everywhere,
+because the hard part is invisible.
+
+## Why the numbers are usually wrong
+
+To compare what two countries paid for spectrum you have to reconcile at least six things:
+currency and the date you converted it on, licence duration, bandwidth, population, whether the
+price includes annual fees or only the upfront sum, and whether the coverage obligations
+attached were trivial or enormous.
+
+Miss any one and you produce a number that looks authoritative and is not. The most common
+failure I see in published benchmarks is population: using a current figure against a price paid
+eight years ago, which quietly rewrites the answer.
+
+## The pipeline
+
+The work was moved out of spreadsheets entirely.
+
+Ingestion pulls from published regulator sources. A normalisation layer applies the conversions
+in a fixed order with the basis recorded for every value, so any figure in the output can be
+traced back to a source row and a set of assumptions. Benchmark construction then builds peer
+groups and computes the comparison set.
+
+Output generation produces the finished chart set, the workbook and the document in one run.
+Nobody formats a table by hand, and rerunning after a data correction takes minutes rather than
+a day.
+
+## What changed
+
+The important outcome was not speed, although it was much faster. It was that the assumptions
+became explicit and reviewable. When someone disagreed with a benchmark, the conversation moved
+from "your number looks wrong" to "you annualised over fifteen years and I would use twenty",
+which is a conversation you can actually resolve.
+
+Versioning the outputs meant a benchmark from six months ago could be reproduced exactly, which
+matters when a figure ends up in a regulatory submission.
+
+## Note on scope
+
+This describes method and tooling only. The pipeline was built in a commercial context and the
+underlying datasets, peer groups and outputs are not published here. Nothing in this page
+reflects any specific client, country position or valuation.

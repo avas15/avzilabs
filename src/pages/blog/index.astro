@@ -1,0 +1,68 @@
+---
+import { getCollection } from 'astro:content';
+import { Icon } from 'astro-icon/components';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+
+const posts = (await getCollection('blog'))
+  .filter((p) => import.meta.env.DEV || !p.data.draft)
+  .sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime());
+---
+
+<BaseLayout
+  title="Writing"
+  description="Notes on spectrum auction design, multiplayer game development, and building small software that stays cheap to run."
+>
+  <section class="mx-auto max-w-4xl px-5 pt-32 sm:px-8 sm:pt-40">
+    <h1 class="text-4xl font-800 tracking-tight text-ink sm:text-5xl" data-reveal>Writing</h1>
+    <p class="mt-4 max-w-2xl text-lg leading-relaxed text-ink-2" data-reveal data-reveal-delay="60">
+      Auction theory that survives contact with a real bidder, netcode lessons learned the hard
+      way, and the occasional note on keeping a server bill under a tenner.
+    </p>
+
+    {
+      posts.length === 0 ? (
+        <p class="mt-16 text-ink-3">First posts are being written. Check back shortly.</p>
+      ) : (
+        <ul data-reveal-group class="mt-14 divide-y divide-line border-y border-line">
+          {posts.map((post) => (
+            <li data-reveal-item>
+              <a href={`/blog/${post.id}`} class="group block py-7">
+                <div class="flex flex-wrap items-center gap-3">
+                  <time
+                    datetime={post.data.pubDate.toISOString()}
+                    class="text-sm text-ink-3 tnum"
+                  >
+                    {post.data.pubDate.toLocaleDateString('en-GB', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric',
+                    })}
+                  </time>
+                  {post.data.tags.slice(0, 2).map((t) => (
+                    <span class="rounded border border-line px-1.5 py-0.5 text-[11px] text-ink-3">
+                      {t}
+                    </span>
+                  ))}
+                </div>
+
+                <h2 class="mt-2.5 text-xl font-600 tracking-tight text-ink transition-colors duration-150 group-hover:text-brand sm:text-2xl">
+                  {post.data.title}
+                </h2>
+                <p class="mt-2 max-w-2xl leading-relaxed text-ink-2">{post.data.description}</p>
+
+                <span class="mt-4 inline-flex items-center gap-1.5 text-sm font-500 text-brand">
+                  Read
+                  <Icon
+                    name="lucide:arrow-right"
+                    class="h-3.5 w-3.5 transition-transform duration-150 group-hover:translate-x-1"
+                    stroke-width={1.75}
+                  />
+                </span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      )
+    }
+  </section>
+</BaseLayout>
