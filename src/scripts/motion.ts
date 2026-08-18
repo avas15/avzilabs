@@ -138,19 +138,6 @@ function init() {
         '-=0.85'
       );
 
-    /*
-      Fade the rain out as the hero leaves rather than parallaxing it. The
-      canvas is already animating internally, and translating it as well reads
-      as two competing motions.
-    */
-    const backdrop = hero.querySelector('[data-hero-backdrop]');
-    if (backdrop) {
-      gsap.to(backdrop, {
-        opacity: 0.25,
-        ease: 'none',
-        scrollTrigger: { trigger: hero, start: 'top top', end: 'bottom top', scrub: true },
-      });
-    }
   }
 
   // --- Section headings type themselves in ---------------------------------

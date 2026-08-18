@@ -26,6 +26,10 @@ interface Props {
   opacity?: number;
   /** Internal render scale. 0.5 renders at half resolution, then scales up. */
   renderScale?: number;
+  /** Matrix fall speed override. */
+  fallSpeed?: number;
+  /** Matrix column density override. */
+  numColumns?: number;
 }
 
 const {
@@ -33,6 +37,8 @@ const {
   blur = '10px',
   opacity = 0.7,
   renderScale = 0.5,
+  fallSpeed = 0.02,
+  numColumns = 120,
 } = Astro.props;
 
 /*
@@ -41,7 +47,7 @@ const {
   anyway - the query string survives it, but it is a wasted round-trip on
   every page load.
 */
-const src = `/matrix/?version=${encodeURIComponent(version)}`;
+const src = `/matrix/?version=${encodeURIComponent(version)}&fallSpeed=${fallSpeed}&numColumns=${numColumns}`;
 const pct = Math.round(100 / renderScale);
 ---
 
@@ -60,11 +66,26 @@ const pct = Math.round(100 / renderScale);
     aria-hidden="true"
     scrolling="no"
   ></iframe>
-  <!-- Darkening veil so body copy keeps its contrast over the rain. -->
-  <div class="absolute inset-0 bg-bg/35"></div>
+  <!-- Full-height content band; the margins remain clear over the rain. -->
+  <div class="pointer-events-none" data-matrix-band aria-hidden="true"></div>
 </div>
 
 <style>
+  [data-matrix-band] {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(
+      to right,
+      transparent 0%,
+      transparent calc(50% - 48rem),
+      color-mix(in srgb, var(--bg) 70%, transparent) calc(50% - 42rem),
+      color-mix(in srgb, var(--bg) 70%, transparent) calc(50% + 42rem),
+      transparent calc(50% + 48rem),
+      transparent 100%
+    );
+  }
+
   [data-matrix-bg] iframe {
     position: absolute;
     top: 0;
