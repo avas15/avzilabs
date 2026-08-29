@@ -153,3 +153,14 @@ export const MAX_PLAYERS = 10;
 export const MAX_CATEGORIES = 16;
 export const MAX_NAME_LENGTH = 20;
 export const MAX_ANSWER_LENGTH = 60;
+
+/*
+  Shortest answer that can score.
+
+  Two, not three. Three would reject "ox", which is a perfectly good animal, and
+  wrongly rejecting a real answer is far more visible at the table than wrongly
+  accepting a weak one - the protest vote exists for the latter. Two still kills
+  the single-letter case that prompted this, and `isValidAnswer` separately
+  rejects an answer that is just the round letter written back.
+*/
+export const MIN_ANSWER_LENGTH = 2;

@@ -82,6 +82,29 @@ describe('isValidAnswer', () => {
   });
 });
 
+describe('answer length floor', () => {
+  it('rejects the round letter written back as an answer', () => {
+    // The observed bug: "L" scored ten points on an L round.
+    expect(isValidAnswer('L', 'L', settings())).toBe(false);
+    expect(isValidAnswer('l', 'L', settings())).toBe(false);
+  });
+
+  it('rejects a single character even when it is not the round letter', () => {
+    expect(isValidAnswer('A', 'A', settings())).toBe(false);
+  });
+
+  it('still accepts genuinely short answers', () => {
+    // A floor of three would have rejected this, which is why it is two.
+    expect(isValidAnswer('Ox', 'O', settings())).toBe(true);
+  });
+
+  it('applies the floor before the dictionary, so it holds either way', () => {
+    const s = settings({ useDictionaries: true });
+    expect(isValidAnswer('L', 'L', s, new Set(['l']))).toBe(false);
+  });
+});
+
+
 describe('scoreRound', () => {
   it('gives 10 for unique and 5 for a shared answer', () => {
     const ps = players('Ana', 'Ben');

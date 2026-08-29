@@ -47,3 +47,7 @@ workers/**/.wrangler/
 # slot-allocation demo: generated, rebuilt by build_demo_db.py / news_updater.py
 demos/slot-allocation/data/demo.sqlite
 demos/slot-allocation/etl/cache/
+
+# Cat Dog Fish seed data: regenerate with workers/catdogfish/scripts/build-dictionaries.py
+# Committed only once complete; a partial build must never ship.
+workers/catdogfish/src/dictionaries.json

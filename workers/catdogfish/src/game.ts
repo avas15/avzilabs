@@ -8,7 +8,7 @@ import type {
   ScoreVerdict,
   Settings,
 } from './types';
-import { PROTEST_THRESHOLD } from './types';
+import { MIN_ANSWER_LENGTH, PROTEST_THRESHOLD } from './types';
 
 /**
  * Pure game logic. No Durable Object, no WebSocket, no clock.
@@ -51,6 +51,17 @@ export function isValidAnswer(
 ): boolean {
   const n = normalise(raw);
   if (!n) return false;
+
+  /*
+    Length floor, applied before anything else.
+
+    A real game scored ten points for an answer of "L" on a round whose letter
+    was L. Writing the round letter back is not an answer. This costs nothing
+    and needs no dictionary, which is why it runs before everything else.
+  */
+  if (n.length < MIN_ANSWER_LENGTH) return false;
+  if (n === letter.toLowerCase()) return false;
+
   if (settings.requireStartsWithLetter && firstLetter(n) !== letter.toUpperCase()) {
     return false;
   }
