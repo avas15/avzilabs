@@ -1,0 +1,6 @@
+# Cloudflare Pages redirects.
+#
+# /discord is baked into shipped Simply Padel builds, so the destination must
+# stay editable here rather than in the game binary. 302 (not 301) on purpose:
+# a permanent redirect gets cached by browsers and would outlive a change.
+/discord   https://discord.gg/eybpswuSpb   302
