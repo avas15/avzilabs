@@ -1,6 +1,6 @@
 ---
 title: 'Padel'
-summary: 'A padel sports game with real shot physics, ragdoll reactions and online multiplayer. Currently in a playable alpha with friends and a long list of things still wrong with the serve.'
+summary: 'A padel sports game with simulated shot physics, ragdoll reactions and online multiplayer. In playable alpha with friends, and a long list of things still wrong with the serve.'
 description: 'Padel is a physics-driven sports game in development, built in Unity with Netcode for GameObjects. Read about the shot model, netcode and design process.'
 kind: 'game'
 year: 2026
@@ -15,12 +15,12 @@ links:
     primary: true
 ---
 
-Padel started as a question I could not let go of: why does no game get the ball right?
+Padel started with a question: why does no game get the ball right?
 
 Padel is a game about walls. The ball comes off the glass, and the whole rally reorganises
 around where it will land. Most sports games treat that as a bounce with a coefficient of
-restitution and move on. It is not. Spin survives the wall, the surface has a grain, and the
-angle you get out is a function of how much the ball was already rotating when it went in.
+restitution and move on. Spin survives the wall, the surface has a grain, and the angle you
+get out depends on how much the ball was already rotating when it went in.
 
 ## The shot model
 
@@ -29,8 +29,8 @@ game derives spin and launch from those four rather than choosing a shot type fr
 means a slice is not a button. It is what happens when the face is open and the path goes down
 across the ball.
 
-The result is a game where two players who both understand padel can have an argument about a
-point, and the game will side with one of them for a reason you can name.
+Two players who both understand padel can argue about a point, and the game will side with one
+of them for a reason you can name.
 
 ## Netcode
 
@@ -38,9 +38,9 @@ The multiplayer runs on Netcode for GameObjects over Unity Relay, host authorita
 is simulated on the host and reconciled on clients, with input prediction on the racket so a
 swing feels immediate at 60 ms of latency.
 
-The honest state of it: rallies hold up well, and the moment where it still breaks is a smash
-returned off the back glass, where the reconciliation window and the wall contact land in the
-same frame. That is the current bug list, in order.
+Rallies hold up well. It still breaks on a smash returned off the back glass, where the
+reconciliation window and the wall contact land in the same frame. That is the top of the bug
+list.
 
 ## Where it is going
 
