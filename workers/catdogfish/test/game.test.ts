@@ -105,6 +105,37 @@ describe('answer length floor', () => {
 });
 
 
+describe('dictionary coverage semantics', () => {
+  // The room sends only this round's answers to be checked, so the set it
+  // passes back is small. That makes the difference between "no dictionary"
+  // and "dictionary matched nothing" load-bearing.
+  const s = () => settings({ useDictionaries: true });
+
+  it('accepts on the letter rule when the category has no dictionary', () => {
+    expect(isValidAnswer('Aardvark', 'A', s(), undefined)).toBe(true);
+  });
+
+  it('rejects when the category IS covered but the answer is not in it', () => {
+    // An empty set means covered-and-unmatched. Testing size > 0 here would
+    // accept a whole round of nonsense whenever nothing matched.
+    expect(isValidAnswer('Aardvark', 'A', s(), new Set())).toBe(false);
+  });
+
+  it('accepts an answer that is in the supplied set', () => {
+    expect(isValidAnswer('Aardvark', 'A', s(), new Set(['aardvark']))).toBe(true);
+  });
+
+  it('rejects a different answer from the same covered category', () => {
+    expect(isValidAnswer('Anteater', 'A', s(), new Set(['aardvark']))).toBe(false);
+  });
+
+  it('ignores the dictionary entirely when the setting is off', () => {
+    const off = settings({ useDictionaries: false });
+    expect(isValidAnswer('Aardvark', 'A', off, new Set())).toBe(true);
+  });
+});
+
+
 describe('scoreRound', () => {
   it('gives 10 for unique and 5 for a shared answer', () => {
     const ps = players('Ana', 'Ben');

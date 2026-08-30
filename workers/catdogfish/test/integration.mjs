@@ -87,6 +87,9 @@ host.send({
     roundSeconds: 6,
     graceSeconds: 0,
     penaltyInvalid: 0,
+    // This test drives the phase machine with invented words. The dictionary
+    // is verified separately in dictionary.mjs.
+    useDictionaries: false,
   },
 });
 await sleep(300);

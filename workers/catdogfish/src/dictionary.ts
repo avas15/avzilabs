@@ -27,6 +27,16 @@ export class Dictionary extends DurableObject {
         votes_against INTEGER NOT NULL,
         PRIMARY KEY (category, word)
       );
+
+      -- Words from published, permissively licensed sources. Kept in its own
+      -- table rather than merged into community: "a dictionary says so" and
+      -- "the table voted it in" are different claims, and conflating them
+      -- would make the community list unauditable.
+      CREATE TABLE IF NOT EXISTS official (
+        category TEXT NOT NULL,
+        word     TEXT NOT NULL,
+        PRIMARY KEY (category, word)
+      );
     `);
     this.ready = true;
   }
@@ -49,6 +59,93 @@ export class Dictionary extends DurableObject {
         out[c] = rows.map((r) => r.word);
       }
       return Response.json(out);
+    }
+
+    /*
+      Batch validity check.
+
+      This is the important endpoint. The alternative - shipping whole word
+      lists to the room so it can build a Set - means moving 370,000 words per
+      round for a game with at most 160 answers in it. Here the room sends the
+      answers it actually needs to judge, and gets back only those that exist.
+    */
+    if (url.pathname.endsWith('/check') && request.method === 'POST') {
+      const pairs = (await request.json()) as { category: string; word: string }[];
+      if (!Array.isArray(pairs) || pairs.length === 0) return Response.json({ valid: [] });
+
+      const valid: { category: string; word: string }[] = [];
+      for (const { category, word } of pairs.slice(0, 400)) {
+        if (!category || !word) continue;
+        const hit = this.ctx.storage.sql
+          .exec<{ n: number }>(
+            `SELECT (
+               (SELECT COUNT(*) FROM official  WHERE category = ?1 AND word = ?2) +
+               (SELECT COUNT(*) FROM community WHERE category = ?1 AND word = ?2)
+             ) AS n`,
+            category,
+            word
+          )
+          .one().n;
+        if (hit > 0) valid.push({ category, word });
+      }
+
+      /*
+        Also report which categories have an official list at all.
+
+        Without this the caller cannot distinguish "this category has no
+        dictionary" from "it has one and none of these answers were in it".
+        Those must behave differently: the first accepts, the second rejects.
+      */
+      const covered = [
+        ...new Set(
+          this.ctx.storage.sql
+            .exec<{ category: string }>('SELECT DISTINCT category FROM official')
+            .toArray()
+            .map((r) => r.category)
+        ),
+      ];
+      return Response.json({ valid, covered });
+    }
+
+    /*
+      Seed official words, in chunks.
+
+      Chunked because the general English list alone is well over 300,000
+      entries, and a single request large enough to carry it would exceed what
+      one Durable Object invocation should be doing. The caller drives the
+      loop; this is idempotent, so a retried chunk is harmless.
+    */
+    if (url.pathname.endsWith('/seed') && request.method === 'POST') {
+      const body = (await request.json()) as { category: string; words: string[] };
+      if (!body?.category || !Array.isArray(body.words)) {
+        return Response.json({ ok: false, error: 'category and words required' }, { status: 400 });
+      }
+      let n = 0;
+      for (const w of body.words) {
+        const word = String(w).trim();
+        if (!word) continue;
+        this.ctx.storage.sql.exec(
+          'INSERT INTO official (category, word) VALUES (?, ?) ON CONFLICT DO NOTHING',
+          body.category,
+          word
+        );
+        n++;
+      }
+      return Response.json({ ok: true, inserted: n });
+    }
+
+    // Which categories have an official list, and how big. Used to decide
+    // whether a category is worth validating against at all.
+    if (url.pathname.endsWith('/stats')) {
+      const rows = this.ctx.storage.sql
+        .exec<{ category: string; n: number }>(
+          'SELECT category, COUNT(*) AS n FROM official GROUP BY category ORDER BY category'
+        )
+        .toArray();
+      const community = this.ctx.storage.sql
+        .exec<{ n: number }>('SELECT COUNT(*) AS n FROM community')
+        .one().n;
+      return Response.json({ official: rows, communityCount: community });
     }
 
     if (url.pathname.endsWith('/add') && request.method === 'POST') {

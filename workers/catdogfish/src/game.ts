@@ -65,8 +65,13 @@ export function isValidAnswer(
   if (settings.requireStartsWithLetter && firstLetter(n) !== letter.toUpperCase()) {
     return false;
   }
-  // A dictionary only ever applies where one has actually been supplied.
-  if (settings.useDictionaries && dictionary && dictionary.size > 0) {
+  /*
+    A dictionary applies wherever one was supplied for this category, including
+    an empty one. Empty means the category is covered and this answer was not
+    found, which must reject. Testing `size > 0` instead would accept an entire
+    round of nonsense whenever no answer happened to match.
+  */
+  if (settings.useDictionaries && dictionary !== undefined) {
     return dictionary.has(n);
   }
   return true;

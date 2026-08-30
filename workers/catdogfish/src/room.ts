@@ -39,20 +39,63 @@ export class Room extends DurableObject<RoomEnv> {
   private cache: RoomState | null = null;
 
   /** Community words for the categories in play, refreshed each scoring pass. */
-  private async communityDictionaries(
-    categories: string[]
+  /**
+   * Ask the dictionary about this round's answers, and nothing else.
+   *
+   * The obvious implementation pulls each category's whole word list and builds
+   * a Set. That means moving several hundred thousand words per round to judge
+   * at most a hundred and sixty answers. Instead the distinct answers actually
+   * played are sent over and the valid ones come back, so the payload scales
+   * with the table rather than the dictionary.
+   *
+   * The return shape is still Record<category, Set<word>>, so scoreRound is
+   * unchanged: it simply receives a set containing only this round's winners.
+   */
+  private async validateAnswers(
+    state: RoomState
   ): Promise<Record<string, Set<string>>> {
+    const pairs: { category: string; word: string }[] = [];
+    const seen = new Set<string>();
+
+    for (const category of state.settings.categories) {
+      for (const p of state.players) {
+        const word = normalise(state.answers[p.id]?.[category] ?? '');
+        if (!word) continue;
+        const key = `${category}::${word}`;
+        if (seen.has(key)) continue;
+        seen.add(key);
+        pairs.push({ category, word });
+      }
+    }
+    if (pairs.length === 0) return {};
+
     try {
       const stub = this.env.DICTIONARY.get(this.env.DICTIONARY.idFromName('global'));
-      const res = await stub.fetch(
-        `https://dict/lookup?categories=${encodeURIComponent(categories.join('|'))}`
-      );
-      const data = (await res.json()) as Record<string, string[]>;
+      const res = await stub.fetch('https://dict/check', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(pairs),
+      });
+      const { valid, covered } = (await res.json()) as {
+        valid: { category: string; word: string }[];
+        covered: string[];
+      };
+
+      /*
+        Every covered category gets an entry, even an empty one. An absent key
+        means "no dictionary for this category, accept on the letter rule"; an
+        empty set means "there is a dictionary and none of these answers were
+        in it, reject them". Collapsing the two would accept a whole round of
+        nonsense whenever nothing happened to match.
+      */
       const out: Record<string, Set<string>> = {};
-      for (const [k, v] of Object.entries(data)) out[k] = new Set(v);
+      for (const c of covered ?? []) out[c] = new Set();
+      for (const v of valid) (out[v.category] ??= new Set()).add(v.word);
       return out;
     } catch {
-      // A dictionary outage must not stop a game; fall back to the letter rule.
+      // A dictionary outage must not stop a game. Returning nothing means
+      // scoreRound falls back to the letter rule, which is the pre-dictionary
+      // behaviour rather than rejecting everything.
       return {};
     }
   }
@@ -413,7 +456,7 @@ export class Room extends DurableObject<RoomEnv> {
    */
   private async rescore(state: RoomState): Promise<void> {
     if (!state.letter) return;
-    const dictionaries = await this.communityDictionaries(state.settings.categories);
+    const dictionaries = await this.validateAnswers(state);
 
     const result = scoreRound(
       state.round,

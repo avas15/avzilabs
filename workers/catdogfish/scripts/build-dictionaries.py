@@ -80,8 +80,15 @@ def get(url: str, timeout: int = 180) -> bytes:
         return r.read()
 
 
-def sparql(query: str, attempts: int = 3) -> list[str]:
-    """Run a SPARQL query and return the ?l column. Retries: WDQS times out."""
+def sparql(query: str, attempts: int = 3) -> list[str] | None:
+    """
+    Run a SPARQL query and return the ?l column.
+
+    Returns None if the query FAILED, and [] if it succeeded and matched
+    nothing. The distinction matters: no chocolate begins with X, which is
+    data, whereas a 504 is a broken source. Collapsing both to [] makes it
+    impossible to tell a sparse category from a dead endpoint.
+    """
     url = SPARQL + "?" + urllib.parse.urlencode({"query": query, "format": "json"})
     for n in range(attempts):
         try:
@@ -90,12 +97,20 @@ def sparql(query: str, attempts: int = 3) -> list[str]:
         except Exception as e:
             if n == attempts - 1:
                 print(f"    query failed after {attempts} attempts: {str(e)[:90]}")
-                return []
+                return None
             time.sleep(5 * (n + 1))
     return []
 
 
 LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
+# Query failures tolerated before the whole build is rejected. Empty results
+# are not failures: a category may genuinely have nothing under some letters.
+MAX_FAILED_LETTERS = 2
+
+
+class IncompleteSource(RuntimeError):
+    """Raised when a source returned too little to trust."""
 
 
 def by_letter(make_query, label: str) -> list[str]:
@@ -108,14 +123,34 @@ def by_letter(make_query, label: str) -> list[str]:
     fast, and it is deterministic without needing a sort.
     """
     seen: set[str] = set()
-    missed: list[str] = []
+    failed: list[str] = []
+    empty: list[str] = []
     for ch in LETTERS:
         rows = sparql(make_query(ch), attempts=2)
+        if rows is None:
+            failed.append(ch)
+            continue
         if not rows:
-            missed.append(ch)
+            empty.append(ch)
         seen.update(rows)
+
     print(f"      {label}: {len(seen)} labels"
-          + (f"  (no results for {''.join(missed)})" if missed else ""))
+          + (f"  [{len(empty)} letters legitimately empty]" if empty else "")
+          + (f"  [FAILED: {''.join(failed)}]" if failed else ""))
+
+    """
+    Refuse a partial result rather than returning one.
+
+    A dictionary missing most of its letters is worse than no dictionary: it
+    silently rejects valid answers, and it looks like it worked. An earlier run
+    of this script wrote a film list covering two letters out of twenty-six and
+    exited zero, which is exactly the failure this guard exists to stop.
+    """
+    if len(failed) > MAX_FAILED_LETTERS:
+        raise IncompleteSource(
+            f"{label}: {len(failed)} of {len(LETTERS)} queries FAILED "
+            f"({''.join(failed)}). Refusing to build a partial dictionary."
+        )
     return sorted(seen)
 
 
@@ -163,19 +198,46 @@ def build() -> None:
 
     print("Building official dictionaries\n")
 
+    print("  smashew/NameDatabases (Unlicense)")
+    names = get("https://raw.githubusercontent.com/smashew/NameDatabases/"
+                "master/NamesDatabases/first%20names/all.txt").decode("utf-8", "replace").splitlines()
+    """
+    One combined list for both name categories, deliberately.
+
+    The source is not gendered, and that is the better outcome rather than a
+    limitation to work around. Which names are "boys' names" is contested and
+    varies by culture, so a dictionary that ruled on it would reject valid
+    answers and make a pronouncement it has no business making. The list
+    answers "is this a real given name", and the table settles the rest by
+    protest, which is what the vote is for.
+    """
+    add("Boy name", names, "given names, not gender-split (see note)")
+    add("Girl name", names, "same list; gender left to the table")
+
+    print("")
     print("  Wikidata (CC0)")
-    add("Boy name", wikidata_instances("Q12308941"), "male given names")
-    add("Girl name", wikidata_instances("Q11879590"), "female given names")
     add("Drink", wikidata_class("Q40050"), "drinks and subclasses")
     add("Chocolate", wikidata_class("Q195"), "chocolate and subclasses")
-    add("Film", wikidata_films(), "films with an en.wikipedia article")
 
-    print("\n  corpora (CC0)")
+    """
+    Film is deliberately left without a dictionary.
+
+    No permissively licensed film list of usable coverage was found. Wikidata
+    has the data but the query service could only return two letters out of
+    twenty-six before timing out, and a film list missing most of the alphabet
+    would reject valid answers while looking like it worked. An absent
+    dictionary is honest; a broken one is not. Film falls back to the letter
+    rule plus the protest vote.
+    """
+
+    print("")
+    print("  corpora (CC0)")
     countries = json.loads(get("https://raw.githubusercontent.com/dariusk/corpora/"
                                "master/data/geography/countries.json"))["countries"]
     add("Country", countries, "sovereign states")
 
-    print("\n  dwyl/english-words (Unlicense)")
+    print("")
+    print("  dwyl/english-words (Unlicense)")
     words = get("https://raw.githubusercontent.com/dwyl/english-words/"
                 "master/words_alpha.txt").decode("utf-8", "replace").split()
     add("Animal", words, "general English; wrong-category answers left to the vote")
@@ -195,6 +257,7 @@ def build() -> None:
         ("loretta", "Girl name", True),
         ("leon", "Boy name", True),
         ("lyon", "Country", False),
+        ("france", "Country", True),
         ("lamp", "Drink", False),
         ("long island iced tea", "Drink", True),
     ]:

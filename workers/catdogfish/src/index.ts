@@ -76,6 +76,24 @@ export default {
       return stub.fetch(new Request(forward.toString(), request));
     }
 
+    // Seed and inspect the official lists. Seeding is idempotent.
+    if (url.pathname.startsWith('/api/dictionary/') && url.pathname !== '/api/dictionary') {
+      const tail = url.pathname.slice('/api/dictionary/'.length);
+      if (!['seed', 'stats', 'check'].includes(tail)) {
+        return new Response('not found', { status: 404, headers: cors });
+      }
+      const stub = env.DICTIONARY.get(env.DICTIONARY.idFromName('global'));
+      const res = await stub.fetch(`https://dict/${tail}`, {
+        method: request.method,
+        headers: { 'content-type': 'application/json' },
+        body: request.method === 'POST' ? await request.text() : undefined,
+      });
+      return new Response(res.body, {
+        status: res.status,
+        headers: { ...cors, 'content-type': 'application/json' },
+      });
+    }
+
     // Words the table has voted in. Public, so the site can show them.
     if (url.pathname === '/api/dictionary' && request.method === 'GET') {
       const stub = env.DICTIONARY.get(env.DICTIONARY.idFromName('global'));

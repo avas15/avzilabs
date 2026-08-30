@@ -145,7 +145,10 @@ export const DEFAULT_SETTINGS: Settings = {
   penaltyInvalid: 0,
   letterPool: 'ABCDEFGHIJKLMNOPRSTUVW',
   requireStartsWithLetter: true,
-  useDictionaries: false,
+  // On by default now that official lists are seeded. Categories without a
+  // list (Food, Film, Chocolate) are unaffected: the room only supplies a set
+  // for covered categories, and an absent set falls back to the letter rule.
+  useDictionaries: true,
   noRepeatLetters: true,
 };
 
