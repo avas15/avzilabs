@@ -1,6 +1,6 @@
 ---
-title: 'A personal platform for under ten euros a month'
-description: 'Portfolio, blog, multiplayer games, live demos and private tools, on infrastructure that cannot surprise me with a bill. The architecture, and the two decisions that made it work.'
+title: 'Planning a personal platform for under ten euros a month'
+description: 'Keeping the portfolio and blog on static hosting, with a small server planned for live demos and private tools. The budget needs traffic limits as well as a server price.'
 pubDate: 2026-08-17
 tags: ['infrastructure', 'cost']
 ---
@@ -10,8 +10,8 @@ multiplayer games to play with friends, and a set of private file tools. The con
 the whole thing had to cost less than a takeaway per month, and that a traffic spike on a game
 must not be able to take down the blog.
 
-Those two requirements pull in opposite directions, and resolving them turned out to be almost
-the entire design.
+The site and word game now run on Cloudflare. The small server and file workers described
+below are the plan for the next stage.
 
 ## The metered billing problem
 
@@ -19,12 +19,13 @@ The obvious route is a small cloud instance. The catch is not the instance price
 Bandwidth on the major clouds is billed per gigabyte, and a browser game or a WebGL build is
 tens of megabytes per visitor.
 
-That is fine until it is not. The failure mode of metered egress is silent: nothing breaks, no
-alert fires, and the consequence arrives four weeks later as a number. For a personal project
-where I am the only person who cares, that risk is not worth carrying.
+An app can keep working while its bandwidth bill grows. Alerts help, but they do not
+necessarily stop usage. I want a budget I can enforce before the invoice arrives.
 
-A fixed-price server removes the entire category. It cannot bill me more than it bills me. That
-one property was worth more than every managed service I gave up.
+A monthly server price makes compute costs predictable, but it does not cap the whole bill.
+Hetzner charges for traffic above the included allowance, and its cost alerts do not stop
+spending. The plan needs traffic limits and a way to stop the service before an overage.
+See [Hetzner's billing FAQ](https://docs.hetzner.com/cloud/billing/faq/).
 
 ## Isolation you cannot buy with tuning
 
@@ -32,16 +33,14 @@ The second requirement was harder. If the games and the blog share a machine, th
 degrades the blog. You can mitigate that with resource limits, and you should, but limits only
 go so far.
 
-Container memory limits are genuinely reliable. CPU weighting works well. But a single machine
-has one network interface, and if something saturates it, everything on that machine is slow.
-There is no cgroup for that.
+Memory limits and CPU weighting help services share a machine. They still share its network
+capacity, so a busy service can affect the others unless traffic is controlled too.
 
 So I stopped trying to solve it on the machine.
 
-The public site is entirely static and served from a CDN. It is not on the server at all. The
-games and tools cannot degrade it, because they are not in the same building, let alone the
-same box. The isolation requirement is met by architecture rather than configuration, and it
-costs nothing.
+The public site is entirely static and served from a CDN. It will not share the application
+server's CPU, memory or network connection. A busy conversion worker therefore won't consume
+the resources serving the blog.
 
 ## The shape it settled into
 
@@ -49,31 +48,27 @@ The static site carries the blog, the portfolio, and the landing pages for every
 Those are the pages that need to be fast and indexed, and they are the ones that will get
 traffic if anything ever does well.
 
-A single small server runs the things that genuinely need a server: WebSocket game sessions, the
-job queue for file conversion, and the live application demos. Each service is capped so no one
-of them can starve the others, and everything reaches the internet through an outbound tunnel,
-which means the machine has no open inbound ports at all. Not even for administration.
+The plan is to use one small server for BidSim's WebSocket sessions, the file-conversion queue
+and live application demos. Each service will have resource limits. An outbound tunnel and
+private administration will keep origin ports closed; the public apps will still need their
+own access controls.
 
-Anything large that needs storing goes to object storage where egress is free, so the server's
-own bandwidth allowance is only ever spent on WebSocket frames and JSON.
+Large static downloads will stay off the application server. Storage and request charges
+will need their own limits, even where downloads have no egress charge.
 
 ## Two things worth stealing
 
-**Put every static byte somewhere else.** Not for performance, although it helps. Because it
-turns your server's bandwidth budget into something you will never plausibly reach, and it
-removes the failure mode where a popular download slows down everything you host.
+**Serve static downloads separately.** A popular download should not compete with a live
+auction for the same server connection.
 
-**Prefer fixed prices to elastic ones when nobody is paying you.** Elastic pricing is correct
-when revenue scales with usage. On a personal project, usage scaling is a liability with no
-matching upside, and a hard ceiling is a feature rather than a compromise.
+**Budget for the whole service.** The monthly instance price is only the starting point.
+Include tax, IP addresses and storage, then decide what should stop when usage reaches the limit.
 
 ## On running the media tools locally
 
-One deliberate oddity. The heavier media conversion does not run on the server. It runs on a
-machine at home that pulls jobs over an outbound connection, and the interface simply shows the
-worker as offline when that machine is switched off.
+The plan for heavier media conversion is a machine at home that pulls jobs over an outbound
+connection. The interface will show the worker as offline when that machine is switched off.
 
-Partly this is about cost, since transcoding is the one workload that could genuinely exhaust a
-small server. Mostly it is that jobs which depend on a residential network connection behave
-very differently from a datacenter one, and the honest engineering answer was to run them where
-they work rather than where it was tidy.
+Partly this is about cost, since transcoding could exhaust a small server. Jobs that depend
+on a residential network connection also behave differently from those on a datacenter
+network, which affects where those workers can run.

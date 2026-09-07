@@ -1,6 +1,6 @@
 ---
 title: 'MCP toolchain'
-summary: 'Model Context Protocol servers that let a coding agent drive FL Studio, Photoshop and Unity directly. Not chat about the software, actually operating it.'
+summary: 'Model Context Protocol servers that let a coding agent operate FL Studio, Photoshop and Unity through their scripting APIs.'
 description: 'A set of Model Context Protocol servers exposing FL Studio, Photoshop and the Unity Editor as agent-callable tools, built for use with Claude Code.'
 kind: 'tool'
 year: 2026
@@ -9,9 +9,8 @@ stack: ['TypeScript', 'Python', 'MCP', 'Unity C#', 'Photoshop UXP']
 order: 6
 ---
 
-A coding agent that can only edit text is doing a fraction of the job. Most creative software
-has a scripting surface already; MCP is a way to hand that surface to the agent as typed,
-callable tools.
+Most creative software already has a scripting API. I use MCP to expose those APIs to a
+coding agent as typed, callable tools.
 
 I have built servers for the three I use most.
 
@@ -26,7 +25,7 @@ That last one changed how useful the whole thing is. An agent that can take a sc
 scene view can check its own work, and the difference between "the code compiled" and "the
 thing looks right" is most of game development.
 
-The interesting design problem was granularity. Too fine and the agent spends its context
+Choosing the size of each operation took some work. Too fine and the agent spends its context
 issuing hundreds of tiny calls; too coarse and the tools only do the exact thing you imagined.
 The version that works exposes composite operations for common intent, with primitives
 underneath for when the composite is wrong.
@@ -40,12 +39,9 @@ programmatically rather than by hand.
 ## FL Studio
 
 The most awkward of the three, because the automation surface is the least designed for it.
-Worth doing anyway: the parts that are scriptable cover a lot of the repetitive work in a
-project, and repetitive work is exactly what should not be done by hand.
+The scriptable parts still cover enough repetitive project work to make it useful.
 
 ## What building them taught me
-
-Three things, in increasing order of importance.
 
 **Tool descriptions are prompts.** The description is what the model reads to decide whether to
 call the thing. A precise description with an example is worth more than a clever
@@ -61,6 +57,6 @@ the interface, not an afterthought.
 
 ## How I work with them
 
-Claude Code as the harness, with these servers attached, plus skills for the workflows I repeat.
+I use Claude Code with these servers attached, plus skills for the workflows I repeat.
 The stack pairs with the [local AI stack](/projects/local-ai-stack) for anything involving
 private data, where the work runs against Qwen or Gemma on my own hardware instead.

@@ -19,7 +19,7 @@ both.
 ## The pipeline
 
 A scheduled daily sweep across regulator sites and industry sources. Each source has its own
-adapter, because they genuinely are all different: some publish clean RSS, some have a search
+adapter: some publish clean RSS, some have a search
 page that must be walked, and some post PDFs to a directory listing with no index at all.
 
 Fetched documents are normalised, deduplicated, classified by band and country, and summarised.
@@ -27,7 +27,7 @@ Everything lands in the same structured database the rest of the spectrum toolin
 a change in a regulator's publication becomes a change in the internal record rather than an
 email somebody has to action.
 
-## The parts that were actually hard
+## Where the pipeline needs care
 
 **Deduplication.** The same award gets covered by the regulator, two trade publications and an
 operator press release, all with different wording. Exact matching catches almost none of it.

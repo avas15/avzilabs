@@ -13,11 +13,9 @@ Local Coder is a desktop coding agent that talks to models running on your own h
 
 ## Why build it
 
-Two reasons, and only one of them is cost.
-
-The obvious one is that a coding agent billed per token gets expensive on long sessions. The
-better one is that some code should not leave the machine it lives on. If the model is local,
-that question does not arise, and you do not have to trust a policy document about it.
+Long coding sessions get expensive when every token is billed. I also work with code that
+should stay on the machine it lives on. Running the model locally keeps that code out of
+hosted inference services.
 
 ## How it works
 
@@ -30,11 +28,10 @@ Alongside the core agent it grew a few things I needed: an image generation inte
 and adapter fetching, batch generation scripts, a model-swapping configuration generator, and a
 mobile mode for driving it from a phone on the same network.
 
-## The honest assessment
+## Where it helps
 
 A locally hosted model on consumer hardware is not competitive with a frontier model on hard
-reasoning. It is genuinely good at the bulk of day-to-day work: mechanical refactors, writing
+reasoning. It is useful for day-to-day work: mechanical refactors, writing
 tests, moving code between files, explaining an unfamiliar function.
 
-The value is knowing where the line is and routing work accordingly, rather than pretending the
-local model is something it is not.
+I choose tasks with those limits in mind.

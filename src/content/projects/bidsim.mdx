@@ -10,7 +10,7 @@ stack: ['FastAPI', 'WebSockets', 'Python', 'Jinja2']
 order: 2
 ---
 
-BidSim is the game I wish I had when I was learning how auctions actually behave.
+BidSim is the game I wish I had when I was learning how auctions behave.
 
 It is a multi-unit ascending auction, the same family used to sell mobile spectrum. Teams are
 given home bands, marginal valuations per block, per-band caps, deployment costs and a churn
@@ -32,9 +32,8 @@ Deliberately small. FastAPI, Jinja2 templates, WebSockets for the live round sta
 dependencies in total. One auction lives in memory at a time and every completed run is
 appended to a JSON lines file, which is the entire persistence layer.
 
-That constraint is not laziness. It means the whole thing starts in under a second, runs
-comfortably on the cheapest server available, and there is no database to go wrong halfway
-through a session with twelve people watching.
+Keeping it small means it starts in under a second and needs no database service during
+a session. Completed runs are saved to a file for later review.
 
 There are two consoles for whoever is running the session and two team screens, and it supports
 being mounted under a URL prefix so it can sit alongside other apps on one host.
