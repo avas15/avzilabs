@@ -129,6 +129,7 @@ const personSchema = {
         if (!reduced) document.documentElement.classList.remove('no-motion');
       })();
     </script>
+    <slot name="head" />
   </head>
 
   {/* No bg-* here: see the note in global.css. An opaque body background

@@ -1,0 +1,616 @@
+---
+/**
+ * Simply Padel takeover for the home page.
+ *
+ * The home page opens as the game's own page and can switch to the Avzilabs
+ * site in place. Both are in the HTML; `data-home` on <html> decides which one
+ * shows (see the head script in pages/index.astro). With no attribute, and so
+ * with JavaScript off, the game page shows.
+ *
+ * Copy follows the live Steam listing. Art is real captures from the Steam
+ * submission kit, resized into public/simply-padel/. The wordmark is the
+ * supplied logo file and must not be rebuilt in text.
+ */
+const STEAM =
+  'https://store.steampowered.com/app/5331810/Simply_Padel/?utm_source=avzilabs&utm_medium=web&utm_campaign=wishlist_push';
+const WIDGET =
+  'https://store.steampowered.com/widget/5331810/?utm_source=avzilabs&utm_medium=web&utm_campaign=wishlist_push';
+const A = '/simply-padel';
+
+const features = [
+  {
+    title: 'Working the point',
+    body: 'You choose which side to prepare your racket for and when to swing. Take the ball early with a volley, or let it bounce and give yourself more time to set up the return. The shot list includes bandejas, víboras, smashes, lobs and chiquitas.',
+    img: `${A}/shot-03-shot-timing.webp`,
+    alt: 'Simply Padel shot timing: a forehand graded Perfect in practice',
+  },
+  {
+    title: 'Using your own glass',
+    body: 'When the ball gets behind you, wait for the rebound or play it against your own back glass to send it back over the net. That second shot is the contrapared. It needs enough height and power to clear the net, and it keeps you in a point when a direct return is difficult.',
+    img: `${A}/shot-11-contrapared.webp`,
+    alt: 'A player in Simply Padel turning to play the ball off the back glass',
+  },
+  {
+    title: 'Following your career',
+    body: 'League fixtures give your season a schedule, with cups and tournaments between them. The career starts in 2026 with your player aged 17 and runs until they are 35. Tour events climb from the Club Series through Challenger, Tour 500 and Tour 1000 to the World Cup and the Tour Finals.',
+    img: `${A}/about-career.webp`,
+    alt: 'The Simply Padel career calendar and standings',
+  },
+  {
+    title: 'Friends on the couch or online',
+    body: 'Up to four people can play on one PC: singles, doubles with AI partners, two of you against the AI, or all four on court. Online, invite friends through Steam or share a join code, and talk with push-to-talk voice chat. You can also host tournaments with up to nine friends.',
+    video: `${A}/clip-tournament.mp4`,
+    alt: 'A tournament draw in Simply Padel',
+  },
+  {
+    title: 'Your player',
+    body: 'Create your player, choose their appearance and kit, and spend stat points on the parts of their game you want to improve, whether that is more power on a smash or more stamina for long rallies.',
+    video: `${A}/clip-character-orbit.mp4`,
+    alt: 'A created player in Simply Padel shown from all sides',
+  },
+  {
+    title: 'Training',
+    body: 'Training has seven drills a week. Target Wall, Moving Target and Rapid Fire are there every week, and four more rotate in from a bigger set that includes Glass Breaker, Spin Gates and the Bin Shot. Each run is 20 shots and can earn bronze, silver or gold.',
+    img: `${A}/about-academy.webp`,
+    alt: 'A training drill in Simply Padel',
+  },
+];
+
+const courts = [
+  { img: 'shot-04-patagonia.webp', label: 'Patagonia' },
+  { img: 'shot-05-oaxaca.webp', label: 'Oaxaca' },
+  { img: 'shot-06-tokyo.webp', label: 'Tokyo' },
+  { img: 'shot-08-stockholm.webp', label: 'Stockholm' },
+];
+
+export const faq = [
+  {
+    q: 'Is there a padel video game for PC?',
+    a: 'Yes. Simply Padel is a padel game for Windows PC, coming to Steam in Early Access, with online and local doubles, ranked play and a career mode.',
+  },
+  {
+    q: 'Can you play padel online with friends?',
+    a: 'Yes. Invite friends through Steam or share a join code. There are ranked matches with an Elo rating, and you can host tournaments with up to nine friends.',
+  },
+  {
+    q: 'Does Simply Padel have local multiplayer?',
+    a: 'Yes. Up to four people can play on one PC.',
+  },
+  {
+    q: 'Is Simply Padel on PlayStation, Xbox or Switch?',
+    a: 'Not yet. Simply Padel is coming to PC on Steam first.',
+  },
+  {
+    q: 'Can you play the ball off the glass?',
+    a: 'Yes. You can wait for the rebound, or play the ball into your own back glass to send it over the net.',
+  },
+];
+---
+
+<div id="sp" class="sp">
+  <header class="sp-top">
+    <a href="#sp" class="sp-brand">
+      <img src={`${A}/icon.png`} alt="" width="28" height="28" />
+      <span>Simply Padel</span>
+    </a>
+    <nav aria-label="Simply Padel">
+      <a href="#sp-trailer" class="sp-nav-opt">Trailer</a>
+      <a href="#sp-features" class="sp-nav-opt">The game</a>
+      <a href="#sp-faq" class="sp-nav-opt">Questions</a>
+      <a href="/discord" class="sp-nav-opt" rel="noopener">Discord</a>
+      <a href="/#avzilabs" data-home-switch="labs" class="sp-switch">Avzilabs site</a>
+    </nav>
+  </header>
+
+  <section class="sp-hero">
+    <img
+      class="sp-hero-bg"
+      src={`${A}/hero.jpg`}
+      alt=""
+      width="2400"
+      height="775"
+      fetchpriority="high"
+    />
+    <div class="sp-hero-inner">
+      <h1>
+        <img src={`${A}/logo.webp`} alt="Simply Padel" width="900" height="279" />
+      </h1>
+      <p class="sp-lede">
+        A skill-based competitive padel game built around timing and shot decisions. Choose your
+        forehand or backhand, compete online or locally, and practise against AI. Create your
+        player and work your way from amateur matches to a professional career.
+      </p>
+      <div class="sp-cta">
+        <a class="sp-btn sp-btn-main" href={STEAM} rel="noopener">Wishlist on Steam</a>
+        <a class="sp-btn" href="#sp-trailer">Watch the trailer</a>
+        <a class="sp-btn" href="/discord" rel="noopener">Join the Discord</a>
+      </div>
+      <p class="sp-note">Coming soon to Steam Early Access on Windows.</p>
+    </div>
+  </section>
+
+  <section id="sp-trailer" class="sp-wrap">
+    <h2>Gameplay trailer</h2>
+    <video
+      class="sp-media"
+      controls
+      preload="none"
+      playsinline
+      poster={`${A}/trailer-poster.jpg`}
+      width="1280"
+      height="720"
+    >
+      <source src={`${A}/trailer.mp4`} type="video/mp4" />
+    </video>
+  </section>
+
+  <section id="sp-features" class="sp-wrap">
+    <h2>The game</h2>
+    <p class="sp-intro">
+      Simply Padel brings the competition and tactics of the real sport to PC. Timing and placement
+      matter: make your opponents work for the point with lobs behind them and chiquitas played
+      softly towards their feet, or use the glass to recover a ball that gets past you. In ranked,
+      play for Elo and work your way up ten skill levels.
+    </p>
+    <div class="sp-features">
+      {
+        features.map((f) => (
+          <article class="sp-feature">
+            {f.video ? (
+              <video
+                class="sp-media"
+                muted
+                loop
+                playsinline
+                preload="none"
+                data-sp-autoplay
+                aria-label={f.alt}
+                width="960"
+                height="540"
+              >
+                <source src={f.video} type="video/mp4" />
+              </video>
+            ) : (
+              <img class="sp-media" src={f.img} alt={f.alt} loading="lazy" width="1600" height="900" />
+            )}
+            <div>
+              <h3>{f.title}</h3>
+              <p>{f.body}</p>
+            </div>
+          </article>
+        ))
+      }
+    </div>
+  </section>
+
+  <section class="sp-wrap">
+    <h2>Courts</h2>
+    <p class="sp-intro">
+      Play at clubs and venues around the world, from a snowy court in Patagonia to a rooftop in
+      Tokyo.
+    </p>
+    <div class="sp-courts">
+      {
+        courts.map((c) => (
+          <figure>
+            <img
+              class="sp-media"
+              src={`${A}/${c.img}`}
+              alt={`Simply Padel court: ${c.label}`}
+              loading="lazy"
+              width="1600"
+              height="900"
+            />
+            <figcaption>{c.label}</figcaption>
+          </figure>
+        ))
+      }
+    </div>
+  </section>
+
+  <section class="sp-wrap sp-wishlist">
+    <h2>Wishlist it on Steam</h2>
+    <p class="sp-intro">
+      Simply Padel is launching as a paid Early Access game. Buying it during development includes
+      the full release. Wishlisting tells Steam to let you know when it is out.
+    </p>
+    <iframe
+      src={WIDGET}
+      title="Simply Padel on Steam"
+      loading="lazy"
+      width="646"
+      height="190"
+      frameborder="0"></iframe>
+  </section>
+
+  <section id="sp-faq" class="sp-wrap">
+    <h2>Questions</h2>
+    <dl class="sp-faq">
+      {
+        faq.map((f) => (
+          <div>
+            <dt>{f.q}</dt>
+            <dd>{f.a}</dd>
+          </div>
+        ))
+      }
+    </dl>
+  </section>
+
+  <footer class="sp-foot">
+    <p>
+      I'm making Simply Padel on my own as Avzilabs. There will be rough edges in Early Access, and
+      I'd rather hear about them than guess.
+    </p>
+    <p class="sp-foot-links">
+      <a href={STEAM} rel="noopener">Steam page</a>
+      <a href="/discord" rel="noopener">Discord</a>
+      <a href="/#avzilabs" data-home-switch="labs">Go to the Avzilabs site</a>
+    </p>
+  </footer>
+</div>
+
+{/* Shown only on the Avzilabs side of the home page: the way back. */}
+<a href="/" data-home-switch="padel" class="sp-return">
+  <img src={`${A}/icon.png`} alt="" width="22" height="22" />
+  <span>Simply Padel</span>
+</a>
+
+<style is:global>
+  /* Which side of the home page shows. Default, with no attribute, is the game. */
+  html:not([data-home='labs']):has(#sp) :is(#labs-home, [data-header], body > footer, [data-matrix-bg], .crt-overlay, .sp-return) {
+    display: none !important;
+  }
+  html[data-home='labs'] #sp {
+    display: none;
+  }
+  html:not([data-home='labs']):has(#sp),
+  html:not([data-home='labs']):has(#sp) body {
+    background-color: #071c29;
+  }
+
+  .sp {
+    --sp-navy: #071c29;
+    --sp-lime: #d9ff49;
+    --sp-ivory: #f5f8ea;
+    --sp-dim: #b9c6c4;
+    background: var(--sp-navy);
+    color: var(--sp-ivory);
+    font-family: 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif;
+    font-size: 17px;
+    line-height: 1.6;
+    min-height: 100vh;
+    text-shadow: none;
+  }
+  .sp a {
+    color: inherit;
+  }
+  .sp h2,
+  .sp h3 {
+    font-style: italic;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    line-height: 1.15;
+    color: var(--sp-ivory);
+    text-shadow: none;
+  }
+  .sp h2 {
+    font-size: clamp(1.7rem, 3.6vw, 2.5rem);
+    margin-bottom: 1rem;
+  }
+  .sp h3 {
+    font-size: 1.35rem;
+    color: var(--sp-lime);
+    margin-bottom: 0.5rem;
+  }
+
+  .sp-top {
+    position: absolute;
+    inset: 0 0 auto 0;
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.9rem clamp(1rem, 4vw, 2.5rem);
+  }
+  .sp-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-weight: 800;
+    font-style: italic;
+    text-decoration: none;
+  }
+  .sp-brand img {
+    border-radius: 6px;
+  }
+  .sp-top nav {
+    display: flex;
+    align-items: center;
+    gap: clamp(0.75rem, 2vw, 1.6rem);
+    font-size: 0.95rem;
+  }
+  .sp-top nav a {
+    text-decoration: none;
+  }
+  .sp-top nav a:hover {
+    color: var(--sp-lime);
+  }
+  .sp-switch,
+  .sp-return {
+    border: 1px solid color-mix(in srgb, var(--sp-ivory, #f5f8ea) 45%, transparent);
+    border-radius: 999px;
+    padding: 0.35rem 0.9rem;
+    background: rgb(7 28 41 / 0.55);
+    backdrop-filter: blur(6px);
+  }
+  @media (max-width: 720px) {
+    .sp-nav-opt {
+      display: none;
+    }
+  }
+
+  .sp-hero {
+    position: relative;
+    min-height: min(92vh, 860px);
+    display: flex;
+    align-items: flex-end;
+    overflow: hidden;
+  }
+  .sp-hero-bg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 60% 50%;
+  }
+  .sp-hero::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(to top, #071c29 4%, rgb(7 28 41 / 0.72) 38%, rgb(7 28 41 / 0.1) 70%),
+      linear-gradient(to right, rgb(7 28 41 / 0.7), transparent 65%);
+  }
+  .sp-hero-inner {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    max-width: 76rem;
+    margin: 0 auto;
+    padding: 7rem clamp(1rem, 4vw, 2.5rem) 3.5rem;
+  }
+  .sp-hero h1 img {
+    width: min(30rem, 78vw);
+    height: auto;
+  }
+  .sp-lede {
+    max-width: 38rem;
+    margin-top: 1.4rem;
+    font-size: 1.1rem;
+  }
+  .sp-cta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 1.6rem;
+  }
+  .sp-btn {
+    display: inline-block;
+    padding: 0.75rem 1.4rem;
+    border-radius: 8px;
+    border: 1px solid rgb(245 248 234 / 0.5);
+    font-weight: 700;
+    text-decoration: none;
+    transition:
+      background-color 0.15s,
+      color 0.15s,
+      border-color 0.15s;
+  }
+  .sp-btn:hover {
+    border-color: var(--sp-lime);
+    color: var(--sp-lime);
+  }
+  .sp a.sp-btn-main {
+    background: var(--sp-lime);
+    border-color: var(--sp-lime);
+    color: #071c29;
+  }
+  .sp a.sp-btn-main:hover {
+    background: var(--sp-ivory);
+    border-color: var(--sp-ivory);
+    color: #071c29;
+  }
+  .sp-note {
+    margin-top: 1rem;
+    color: var(--sp-dim);
+    font-size: 0.95rem;
+  }
+
+  .sp-wrap {
+    max-width: 76rem;
+    margin: 0 auto;
+    padding: 3.5rem clamp(1rem, 4vw, 2.5rem) 0;
+    scroll-margin-top: 1rem;
+  }
+  .sp-intro {
+    max-width: 44rem;
+    color: var(--sp-dim);
+    margin-bottom: 1.75rem;
+  }
+  .sp-media {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: 10px;
+    background: #04121b;
+  }
+  .sp-features {
+    display: grid;
+    gap: 2.5rem;
+  }
+  .sp-feature {
+    display: grid;
+    gap: 1.25rem;
+    align-items: center;
+  }
+  .sp-feature p {
+    color: var(--sp-dim);
+  }
+  @media (min-width: 820px) {
+    .sp-feature {
+      grid-template-columns: 1.15fr 1fr;
+      gap: 2.5rem;
+    }
+    .sp-feature:nth-child(even) > :first-child {
+      order: 2;
+    }
+  }
+  .sp-courts {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
+  }
+  .sp-courts figcaption {
+    margin-top: 0.4rem;
+    color: var(--sp-dim);
+    font-size: 0.95rem;
+  }
+  .sp-wishlist iframe {
+    width: 100%;
+    max-width: 646px;
+    border: 0;
+    border-radius: 6px;
+  }
+  .sp-faq {
+    display: grid;
+    gap: 1.25rem;
+    max-width: 48rem;
+  }
+  .sp-faq dt {
+    font-weight: 700;
+  }
+  .sp-faq dd {
+    color: var(--sp-dim);
+    margin: 0.2rem 0 0;
+  }
+  .sp-foot {
+    max-width: 76rem;
+    margin: 4rem auto 0;
+    padding: 2rem clamp(1rem, 4vw, 2.5rem) 3rem;
+    border-top: 1px solid rgb(245 248 234 / 0.14);
+    color: var(--sp-dim);
+    font-size: 0.95rem;
+  }
+  .sp-foot p {
+    max-width: 44rem;
+  }
+  .sp-foot-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.25rem;
+    margin-top: 1rem;
+  }
+  .sp-foot-links a:hover {
+    color: var(--sp-lime);
+  }
+
+  /* The way back, on the Avzilabs side. */
+  .sp-return {
+    position: fixed;
+    left: 1rem;
+    bottom: 1rem;
+    z-index: 60;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #f5f8ea;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    font-style: italic;
+    text-decoration: none;
+    text-shadow: none;
+  }
+  .sp-return img {
+    border-radius: 4px;
+  }
+  .sp-return:hover {
+    border-color: #d9ff49;
+    color: #d9ff49;
+  }
+</style>
+
+<script>
+  /*
+    Switches the home page between the game and the Avzilabs site in place.
+    The choice lasts for the browser session, so the header's home link does
+    not throw a visitor who chose Avzilabs back onto the game page. A fresh
+    visit always opens on Simply Padel.
+  */
+  const root = document.documentElement;
+  const TITLES = { padel: document.title, labs: 'Avzilabs' };
+
+  const playVisible = (on: boolean) => {
+    document.querySelectorAll<HTMLVideoElement>('[data-sp-autoplay]').forEach((v) => {
+      if (!on) v.pause();
+    });
+  };
+
+  function apply(mode: 'padel' | 'labs') {
+    if (mode === 'labs') root.setAttribute('data-home', 'labs');
+    else root.removeAttribute('data-home');
+    document.title = TITLES[mode];
+    try {
+      sessionStorage.setItem('avzi-home', mode);
+    } catch {}
+    history.replaceState(null, '', mode === 'labs' ? '/#avzilabs' : '/');
+    window.scrollTo(0, 0);
+    playVisible(mode === 'padel');
+    // Layout changed wholesale: scroll-driven reveals need new measurements.
+    window.dispatchEvent(new Event('resize'));
+    import('gsap/ScrollTrigger').then((m) => m.ScrollTrigger.refresh()).catch(() => {});
+  }
+
+  function switchTo(mode: 'padel' | 'labs') {
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const doc = document as Document & { startViewTransition?: (cb: () => void) => unknown };
+    if (!reduced && doc.startViewTransition) doc.startViewTransition(() => apply(mode));
+    else apply(mode);
+  }
+
+  document.addEventListener(
+    'click',
+    (e) => {
+      const a = (e.target as Element).closest<HTMLElement>('[data-home-switch]');
+      if (!a) return;
+      e.preventDefault();
+      e.stopPropagation();
+      switchTo(a.dataset.homeSwitch === 'labs' ? 'labs' : 'padel');
+    },
+    true,
+  );
+
+  if (root.getAttribute('data-home') === 'labs') document.title = TITLES.labs;
+
+  // Feature clips play only while on screen.
+  const io = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((en) => {
+        const v = en.target as HTMLVideoElement;
+        if (en.isIntersecting) v.play().catch(() => {});
+        else v.pause();
+      });
+    },
+    { threshold: 0.35 },
+  );
+  if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    document.querySelectorAll('[data-sp-autoplay]').forEach((v) => io.observe(v));
+  } else {
+    document.querySelectorAll<HTMLVideoElement>('[data-sp-autoplay]').forEach((v) => {
+      v.controls = true;
+    });
+  }
+</script>

@@ -5,6 +5,7 @@ import Hero from '@/components/Hero.astro';
 import FeaturedCard from '@/components/FeaturedCard.astro';
 import ProjectCard from '@/components/ProjectCard.astro';
 import Terminal from '@/components/Terminal.astro';
+import SimplyPadel, { faq as padelFaq } from '@/components/SimplyPadel.astro';
 import { SITE } from '@/config';
 
 const isPublished = <T extends { data: { draft: boolean } }>(e: T) =>
@@ -47,9 +48,61 @@ const websiteSchema = {
   url: SITE.url,
   description: SITE.description,
 };
+const padelDescription =
+  'Simply Padel is a padel game for PC: online and local doubles, ranked play, a career mode and glass that stays in play. Wishlist it on Steam.';
+
+const gameSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'VideoGame',
+  name: 'Simply Padel',
+  url: SITE.url,
+  description:
+    'A skill-based competitive padel game for PC with online and local multiplayer, ranked play and a career mode.',
+  genre: ['Sports', 'Padel'],
+  gamePlatform: 'PC',
+  operatingSystem: 'Windows',
+  applicationCategory: 'Game',
+  playMode: ['SinglePlayer', 'MultiPlayer'],
+  publisher: { '@type': 'Organization', name: 'Avzilabs', url: SITE.url },
+  image: `${SITE.url}/simply-padel/og.jpg`,
+  sameAs: ['https://store.steampowered.com/app/5331810/Simply_Padel/'],
+};
+
+const faqSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: padelFaq.map((f) => ({
+    '@type': 'Question',
+    name: f.q,
+    acceptedAnswer: { '@type': 'Answer', text: f.a },
+  })),
+};
 ---
 
-<BaseLayout schema={[websiteSchema]}>
+<BaseLayout
+  title="Simply Padel, a padel game for PC"
+  description={padelDescription}
+  ogImage="/simply-padel/og.jpg"
+  schema={[websiteSchema, gameSchema, faqSchema]}
+>
+  {/*
+    Before first paint: the home page opens as Simply Padel unless this session
+    already switched to the Avzilabs side, or the link asked for it.
+  */}
+  <script is:inline slot="head">
+    (function () {
+      var labs = location.hash === '#avzilabs';
+      try {
+        if (location.hash !== '#avzilabs' && sessionStorage.getItem('avzi-home') === 'labs') labs = true;
+        if (labs) sessionStorage.setItem('avzi-home', 'labs');
+      } catch (e) {}
+      if (labs) document.documentElement.setAttribute('data-home', 'labs');
+    })();
+  </script>
+
+  <SimplyPadel />
+
+  <div id="labs-home">
   <Hero stats={stats} />
 
   {featured && <FeaturedCard project={featured} />}
@@ -169,4 +222,5 @@ const websiteSchema = {
       </a>
     </div>
   </section>
+  </div>
 </BaseLayout>

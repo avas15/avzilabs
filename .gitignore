@@ -51,3 +51,6 @@ demos/slot-allocation/etl/cache/
 # Cat Dog Fish seed data: regenerate with workers/catdogfish/scripts/build-dictionaries.py
 # Committed only once complete; a partial build must never ship.
 workers/catdogfish/src/dictionaries.json
+
+# Simply Padel trailer: 20 MB, deployed from disk, kept out of git
+public/simply-padel/trailer.mp4
